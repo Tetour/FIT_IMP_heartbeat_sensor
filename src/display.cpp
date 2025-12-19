@@ -2,11 +2,7 @@
 
 Display::Display() : 
     display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET),
-    currentSelection(MenuOption::OFFSET),
-    offsetValue(0),
-    thresholdValue(50),
-    peakDecayValue(25),
-    troughDecayValue(10) {
+    currentSelection(MenuOption::OFFSET) {
 }
 
 void Display::init() {
@@ -49,7 +45,7 @@ void Display::showBPM(int bpm) {
   display.display();
 }
 
-void Display::showMenu() {
+void Display::showMenu(const Sensor& sensor) {
   display.clearDisplay();
   
   // Menu title
@@ -62,27 +58,27 @@ void Display::showMenu() {
   
   // Offset option
   display.setCursor(0, 20);
-  display.printf("%sOffset:", getPrefix(MenuOption::OFFSET));
+  display.printf("%sValue offset:", getPrefix(MenuOption::OFFSET));
   display.setCursor(100, 20);
-  display.printf("%4d", offsetValue);
+  display.printf("%4d", sensor.getOffset());
   
   // Threshold option
   display.setCursor(0, 30);
-  display.printf("%sThreshold:", getPrefix(MenuOption::THRESHOLD));
+  display.printf("%sThrs offset:", getPrefix(MenuOption::BEAT_THRESHOLD));
   display.setCursor(100, 30);
-  display.printf("%4d", thresholdValue);
+  display.printf("%4d", sensor.getThreshold());
   
   // Peak decay rate option
   display.setCursor(0, 40);
-  display.printf("%sPDR:", getPrefix(MenuOption::PEAK_DECAY));
+  display.printf("%sPeak DR:", getPrefix(MenuOption::PEAK_DECAY));
   display.setCursor(100, 40);
-  display.printf("%4d", peakDecayValue);
+  display.printf("%4d", sensor.getPeakDecayRate());
   
   // Through decay rate option
   display.setCursor(0, 50);
-  display.printf("%sTDR:", getPrefix(MenuOption::TROUGH_DECAY));
+  display.printf("%sTrough DR:", getPrefix(MenuOption::TROUGH_DECAY));
   display.setCursor(100, 50);
-  display.printf("%4d", troughDecayValue);
+  display.printf("%4d", sensor.getTroughDecayRate());
 
   display.display();
 }
@@ -101,20 +97,28 @@ void Display::handleDownMovement() {
   currentSelection = static_cast<MenuOption>(current);
 }
 
-void Display::handleLeftMovement() {
+void Display::handleLeftMovement(Sensor& sensor) {
   switch (currentSelection) {
-    case MenuOption::OFFSET:
-      offsetValue = max(offsetMin, offsetValue - offsetStep);
+    case MenuOption::OFFSET: {
+      int currentValue = sensor.getOffset();
+      sensor.setOffset(max(Sensor::getOffsetMin(), currentValue - offsetStep));
       break;
-    case MenuOption::THRESHOLD:
-      thresholdValue = max(thresholdMin, thresholdValue - thresholdStep);
+    }
+    case MenuOption::BEAT_THRESHOLD: {
+      int currentValue = sensor.getThreshold();
+      sensor.setThreshold(max(Sensor::getThresholdMin(), currentValue - thresholdStep));
       break;
-    case MenuOption::PEAK_DECAY:
-      peakDecayValue = max(peakDecayMin, peakDecayValue - peakDecayStep);
+    }
+    case MenuOption::PEAK_DECAY: {
+      int currentValue = sensor.getPeakDecayRate();
+      sensor.setPeakDecayRate(max(Sensor::getPeakDecayMin(), currentValue - peakDecayStep));
       break;
-    case MenuOption::TROUGH_DECAY:
-      troughDecayValue = max(troughDecayMin, troughDecayValue - troughDecayStep);
+    }
+    case MenuOption::TROUGH_DECAY: {
+      int currentValue = sensor.getTroughDecayRate();
+      sensor.setTroughDecayRate(max(Sensor::getTroughDecayMin(), currentValue - troughDecayStep));
       break;
+    }
     default:
       break;
   }
@@ -123,16 +127,16 @@ void Display::handleLeftMovement() {
 void Display::handleRightMovement() {
   switch (currentSelection) {
     case MenuOption::OFFSET:
-      offsetValue = min(offsetMax, offsetValue + offsetStep);
+      offsetValue = min(Sensor::getOffsetMax(), offsetValue + offsetStep);
       break;
-    case MenuOption::THRESHOLD:
-      thresholdValue = min(thresholdMax, thresholdValue + thresholdStep);
+    case MenuOption::BEAT_THRESHOLD:
+      thresholdValue = min(Sensor::getThresholdMax(), thresholdValue + thresholdStep);
       break;
     case MenuOption::PEAK_DECAY:
-      peakDecayValue = min(peakDecayMax, peakDecayValue + peakDecayStep);
+      peakDecayValue = min(Sensor::getPeakDecayMax(), peakDecayValue + peakDecayStep);
       break;
     case MenuOption::TROUGH_DECAY:
-      troughDecayValue = min(troughDecayMax, troughDecayValue + troughDecayStep);
+      troughDecayValue = min(Sensor::getTroughDecayMax(), troughDecayValue + troughDecayStep);
       break;
     default:
       break;
@@ -141,4 +145,11 @@ void Display::handleRightMovement() {
 
 const char* Display::getPrefix(MenuOption option) const {
   return (currentSelection == option) ? "> " : "  ";
+}
+
+void Display::syncWithSensor(const Sensor& sensor) {
+  offsetValue = sensor.getOffset();
+  thresholdValue = sensor.getThreshold();
+  peakDecayValue = sensor.getPeakDecayRate();
+  troughDecayValue = sensor.getTroughDecayRate();
 }

@@ -16,6 +16,9 @@ void setup() {
   display.init();
   joystick.init();
   sensor.init();
+  
+  // Sync display values with sensor defaults
+  display.syncWithSensor(sensor);
 }
 
 void loop() {
@@ -47,12 +50,22 @@ void loop() {
     }
     if (joystick.wasLeftPressed()) {
       display.handleLeftMovement();
+      // Update sensor with new values
+      sensor.setOffset(display.getOffsetValue());
+      sensor.setThreshold(display.getThresholdValue());
+      sensor.setPeakDecayRate(display.getPeakDecayValue());
+      sensor.setTroughDecayRate(display.getTroughDecayValue());
       if (Serial) {
         Serial.println("Menu: LEFT movement (decrease value)");
       }
     }
     if (joystick.wasRightPressed()) {
       display.handleRightMovement();
+      // Update sensor with new values
+      sensor.setOffset(display.getOffsetValue());
+      sensor.setThreshold(display.getThresholdValue());
+      sensor.setPeakDecayRate(display.getPeakDecayValue());
+      sensor.setTroughDecayRate(display.getTroughDecayValue());
       if (Serial) {
         Serial.println("Menu: RIGHT movement (increase value)");
       }
