@@ -1,5 +1,4 @@
-#ifndef JOYSTICK_HPP
-#define JOYSTICK_HPP
+#pragma once
 
 #include <Arduino.h>
 
@@ -25,6 +24,3 @@ bool wasDownPressed();
 bool wasLeftPressed();
 bool wasRightPressed();
 bool wasMidPressed();
-
-
-#endif

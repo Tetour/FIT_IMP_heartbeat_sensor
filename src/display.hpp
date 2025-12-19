@@ -1,5 +1,4 @@
-#ifndef DISPLAY_HPP
-#define DISPLAY_HPP
+#pragma once
 
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -9,10 +8,13 @@
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 
-extern Adafruit_SSD1306 display;
-
-void initDisplay();
-void displayBPM(int bpm);
-void displayMenu();
-
-#endif
+class Display {
+private:
+    Adafruit_SSD1306 display;
+    
+public:
+    Display();
+    void init();
+    void showBPM(int bpm);
+    void showMenu();
+};

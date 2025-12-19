@@ -1,8 +1,9 @@
 #include "display.hpp"
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Display::Display() : display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET) {
+}
 
-void initDisplay() {
+void Display::init() {
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;);
@@ -14,7 +15,7 @@ void initDisplay() {
   display.display();
 }
 
-void displayBPM(int bpm) {
+void Display::showBPM(int bpm) {
   display.clearDisplay();
   
   // Title
@@ -42,7 +43,7 @@ void displayBPM(int bpm) {
   display.display();
 }
 
-void displayMenu() {
+void Display::showMenu() {
   display.clearDisplay();
   
   // Menu title

@@ -3,13 +3,14 @@
 #include "joystick.hpp"
 #include "sensor.hpp"
 
+Display display;
 bool showMenu = false;
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting...");
   
-  initDisplay();
+  display.init();
   initJoystick();
   initSensor();
 }
@@ -31,10 +32,10 @@ void loop() {
   static unsigned long lastDisplayUpdate = 0;
   if (millis() - lastDisplayUpdate > 100) {
     if (showMenu) {
-      displayMenu();
+      display.showMenu();
     } else {
       int currentBPM = getBPM();
-      displayBPM(currentBPM);
+      display.showBPM(currentBPM);
     }
     lastDisplayUpdate = millis();
   }
