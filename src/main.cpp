@@ -31,6 +31,34 @@ void loop() {
     }
   }
 
+  // Menu navigation when menu is shown
+  if (showMenu) {
+    if (joystick.wasUpPressed()) {
+      display.handleUpMovement();
+      if (Serial) {
+        Serial.println("Menu: UP movement");
+      }
+    }
+    if (joystick.wasDownPressed()) {
+      display.handleDownMovement();
+      if (Serial) {
+        Serial.println("Menu: DOWN movement");
+      }
+    }
+    if (joystick.wasLeftPressed()) {
+      display.handleLeftMovement();
+      if (Serial) {
+        Serial.println("Menu: LEFT movement (decrease value)");
+      }
+    }
+    if (joystick.wasRightPressed()) {
+      display.handleRightMovement();
+      if (Serial) {
+        Serial.println("Menu: RIGHT movement (increase value)");
+      }
+    }
+  }
+
   // Update display every 100ms
   static unsigned long lastDisplayUpdate = 0;
   if (millis() - lastDisplayUpdate > 100) {

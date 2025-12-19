@@ -54,7 +54,7 @@ void Sensor::update() {
       lastBeatTime = now;
 
       if (Serial && bpm > 0) {
-        Serial.print("♥ Beat! BPM: ");
+        Serial.print("BPM: ");
         Serial.print(bpm);
         Serial.print(" Signal: ");
         Serial.println(sensorSignal);
