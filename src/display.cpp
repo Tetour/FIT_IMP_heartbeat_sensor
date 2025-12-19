@@ -60,13 +60,13 @@ void Display::showMenu() {
   display.setCursor(0, 20);
   display.printf("%sValue offset:", getPrefix(MenuOption::OFFSET));
   display.setCursor(100, 20);
-  display.printf("%4d", sensor.getOffset());
+  display.printf("%4d", sensor.getValueOffset());
   
   // Threshold option
   display.setCursor(0, 30);
   display.printf("%sThrs offset:", getPrefix(MenuOption::BEAT_THRESHOLD));
   display.setCursor(100, 30);
-  display.printf("%4d", sensor.getThreshold());
+  display.printf("%4d", sensor.getThresholdOffset());
   
   // Peak decay rate option
   display.setCursor(0, 40);
@@ -100,13 +100,13 @@ void Display::handleDownMovement() {
 void Display::handleLeftMovement() {
   switch (currentSelection) {
     case MenuOption::OFFSET: {
-      int currentValue = sensor.getOffset();
-      sensor.setOffset(max(Sensor::getOffsetMin(), currentValue - offsetStep));
+      int currentValue = sensor.getValueOffset();
+      sensor.setValueOffset(max(Sensor::getValueOffsetMin(), currentValue - offsetStep));
       break;
     }
     case MenuOption::BEAT_THRESHOLD: {
-      int currentValue = sensor.getThreshold();
-      sensor.setThreshold(max(Sensor::getThresholdMin(), currentValue - thresholdStep));
+      int currentValue = sensor.getThresholdOffset();
+      sensor.setThresholdOffset(max(Sensor::getThresholdOffsetMin(), currentValue - thresholdStep));
       break;
     }
     case MenuOption::PEAK_DECAY: {
@@ -127,13 +127,13 @@ void Display::handleLeftMovement() {
 void Display::handleRightMovement() {
   switch (currentSelection) {
     case MenuOption::OFFSET: {
-      int currentValue = sensor.getOffset();
-      sensor.setOffset(min(Sensor::getOffsetMax(), currentValue + offsetStep));
+      int currentValue = sensor.getValueOffset();
+      sensor.setValueOffset(min(Sensor::getValueOffsetMax(), currentValue + offsetStep));
       break;
     }
     case MenuOption::BEAT_THRESHOLD: {
-      int currentValue = sensor.getThreshold();
-      sensor.setThreshold(min(Sensor::getThresholdMax(), currentValue + thresholdStep));
+      int currentValue = sensor.getThresholdOffset();
+      sensor.setThresholdOffset(min(Sensor::getThresholdOffsetMax(), currentValue + thresholdStep));
       break;
     }
     case MenuOption::PEAK_DECAY: {

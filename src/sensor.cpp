@@ -3,16 +3,16 @@
 Sensor::Sensor() :
     sensorSignal(0),
     lastSignal(0),
-    threshold(550),  // Default threshold value
+    threshold(DEFAULT_THRESHOLD),  // Default threshold value
     beatDetected(false),
     lastBeatTime(0),
     bpm(0),
     peakValue(0),
     troughValue(4095),
     pulseDetected(false),
-    peakDecayRate(2),
-    troughDecayRate(2),
-    offset(0) {  // Default offset value
+    peakDecayRate(DEFAULT_PEAK_DECAY_RATE),
+    troughDecayRate(DEFAULT_TROUGH_DECAY_RATE),
+    offset(DEFAULT_OFFSET) {  // Default offset value
 }
 
 void Sensor::init() {
@@ -112,20 +112,20 @@ int Sensor::getTroughDecayRate() const {
   return troughDecayRate;
 }
 
-// Offset configuration methods
-void Sensor::setOffset(int value) {
+// Value offset configuration methods
+void Sensor::setValueOffset(int value) {
   offset = max(OFFSET_MIN, min(OFFSET_MAX, value));
 }
 
-int Sensor::getOffset() const {
+int Sensor::getValueOffset() const {
   return offset;
 }
 
-// Threshold configuration methods
-void Sensor::setThreshold(int value) {
+// Threshold offset configuration methods
+void Sensor::setThresholdOffset(int value) {
   threshold = max(THRESHOLD_MIN, min(THRESHOLD_MAX, value));
 }
 
-int Sensor::getThreshold() const {
+int Sensor::getThresholdOffset() const {
   return threshold;
 }

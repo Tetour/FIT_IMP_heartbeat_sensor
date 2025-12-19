@@ -2,19 +2,19 @@
 
 #include <Arduino.h>
 
-#define PULSE_INPUT 34        // Analog input pin (GPIO 34 is ADC1_CH6)
-#define THRESHOLD 550         // Threshold for beat detection
-
 class Sensor {
 private:
+    // Hardware configuration
+    static const int PULSE_INPUT = 34;        // Analog input pin (GPIO 34 is ADC1_CH6)
+    
     // Variables for beat detection
     int sensorSignal;
     int lastSignal;
-    bool beatDetected;
     unsigned long lastBeatTime;
     int bpm;
     int peakValue;
     int troughValue;
+    bool beatDetected;
     bool pulseDetected;
     
     // Configuration parameters
@@ -22,6 +22,12 @@ private:
     int troughDecayRate;
     int offset;
     int threshold;
+
+    // Configuration parameter defaults
+    static const int DEFAULT_THRESHOLD = 550;
+    static const int DEFAULT_PEAK_DECAY_RATE = 2;
+    static const int DEFAULT_TROUGH_DECAY_RATE = 2;
+    static const int DEFAULT_OFFSET = 0;
 
     // Configuration parameter limits
     static const int PEAK_DECAY_MIN = 0;
@@ -42,25 +48,29 @@ public:
     int  getSignal();             // Get raw sensor signal value
     
     // Sensor configuration
+    int  getValueOffset() const;
+    void setValueOffset(int value);
+
+    int  getThresholdOffset() const;
+    void setThresholdOffset(int value);
+
     int  getPeakDecayRate() const;
     void setPeakDecayRate(int rate);
 
     int  getTroughDecayRate() const;
     void setTroughDecayRate(int rate);
 
-    int  getOffset() const;
-    void setOffset(int value);
-
-    int  getThreshold() const;
-    void setThreshold(int value);
-
     // Configuration limits
+    static int getValueOffsetMin() { return OFFSET_MIN; }
+    static int getValueOffsetMax() { return OFFSET_MAX; }
+
+    static int getThresholdOffsetMin() { return THRESHOLD_MIN; }
+    static int getThresholdOffsetMax() { return THRESHOLD_MAX; }
+
     static int getPeakDecayMin() { return PEAK_DECAY_MIN; }
     static int getPeakDecayMax() { return PEAK_DECAY_MAX; }
+
     static int getTroughDecayMin() { return TROUGH_DECAY_MIN; }
     static int getTroughDecayMax() { return TROUGH_DECAY_MAX; }
-    static int getOffsetMin() { return OFFSET_MIN; }
-    static int getOffsetMax() { return OFFSET_MAX; }
-    static int getThresholdMin() { return THRESHOLD_MIN; }
-    static int getThresholdMax() { return THRESHOLD_MAX; }
+
 };
