@@ -18,7 +18,14 @@ void loop() {
   updateJoystick();
   updateSensor();
 
-  showMenu = isMidPressed() ? !showMenu : showMenu;
+  // Toggle menu on middle button press (edge detection)
+  if (wasMidPressed()) {
+    showMenu = !showMenu;
+    if (Serial) {
+      Serial.print("Menu ");
+      Serial.println(showMenu ? "shown" : "hidden");
+    }
+  }
 
   // Update display every 100ms
   static unsigned long lastDisplayUpdate = 0;

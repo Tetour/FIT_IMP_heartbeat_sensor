@@ -13,10 +13,18 @@
 
 void initJoystick();
 void updateJoystick();  // Call this in loop()
+
 bool isUpPressed();
 bool isDownPressed();
 bool isLeftPressed();
 bool isRightPressed();
 bool isMidPressed();
+
+bool wasUpPressed();
+bool wasDownPressed();
+bool wasLeftPressed();
+bool wasRightPressed();
+bool wasMidPressed();
+
 
 #endif

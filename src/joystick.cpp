@@ -14,6 +14,13 @@ static bool leftPressed = false;
 static bool rightPressed = false;
 static bool midPressed = false;
 
+// Edge detection states (true until cleared by wasPressed functions)
+static bool upWasPressed = false;
+static bool downWasPressed = false;
+static bool leftWasPressed = false;
+static bool rightWasPressed = false;
+static bool midWasPressed = false;
+
 // Last debounce times
 static unsigned long lastUpDebounce = 0;
 static unsigned long lastDownDebounce = 0;
@@ -46,6 +53,7 @@ void updateJoystick() {
   if ((now - lastUpDebounce) > DEBOUNCE_DELAY) {
     if (upReading != upPressed) {
       upPressed = upReading;
+      upWasPressed = upPressed;  // Set edge detection flag
       if (upPressed && Serial) {
         Serial.println("UP pressed");
       }
@@ -60,6 +68,7 @@ void updateJoystick() {
   if ((now - lastDownDebounce) > DEBOUNCE_DELAY) {
     if (downReading != downPressed) {
       downPressed = downReading;
+      downWasPressed = downPressed;
       if (downPressed && Serial) {
         Serial.println("DOWN pressed");
       }
@@ -74,6 +83,7 @@ void updateJoystick() {
   if ((now - lastLeftDebounce) > DEBOUNCE_DELAY) {
     if (leftReading != leftPressed) {
       leftPressed = leftReading;
+      leftWasPressed = leftPressed;
       if (leftPressed && Serial) {
         Serial.println("LEFT pressed");
       }
@@ -88,6 +98,7 @@ void updateJoystick() {
   if ((now - lastRightDebounce) > DEBOUNCE_DELAY) {
     if (rightReading != rightPressed) {
       rightPressed = rightReading;
+      rightWasPressed = rightPressed;
       if (rightPressed && Serial) {
         Serial.println("RIGHT pressed");
       }
@@ -102,6 +113,7 @@ void updateJoystick() {
   if ((now - lastMidDebounce) > DEBOUNCE_DELAY) {
     if (midReading != midPressed) {
       midPressed = midReading;
+      midWasPressed = midPressed;
       if (midPressed && Serial) {
         Serial.println("MID pressed");
       }
@@ -128,4 +140,34 @@ bool isRightPressed() {
 
 bool isMidPressed() {
   return midPressed;
+}
+
+bool wasUpPressed() {
+  bool result = upWasPressed;
+  upWasPressed = false;
+  return result;
+}
+
+bool wasDownPressed() {
+  bool result = downWasPressed;
+  downWasPressed = false;
+  return result;
+}
+
+bool wasLeftPressed() {
+  bool result = leftWasPressed;
+  leftWasPressed = false;
+  return result;
+}
+
+bool wasRightPressed() {
+  bool result = rightWasPressed;
+  rightWasPressed = false;
+  return result;
+}
+
+bool wasMidPressed() {
+  bool result = midWasPressed;
+  midWasPressed = false;
+  return result;
 }

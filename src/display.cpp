@@ -22,34 +22,44 @@ void displayBPM(int bpm) {
   display.setCursor(0, 0);
   display.println(F("Heart Rate Monitor"));
   
-  // Prepare BPM text
-  String bpmText = (bpm > 0) ? String(bpm) : "--";
-  
-  // Calculate text bounds for right alignment
-  int16_t x, y;
-  uint16_t w, h;
+  // BPM value on the left (right-aligned in 3-digit space)
   display.setTextSize(3);
-  display.getTextBounds(bpmText, 0, 0, &x, &y, &w, &h);
+  display.setCursor(10, 25);
+  if (bpm > 0) {
+    // Format to always show 3 characters, right-aligned
+    char bpmStr[4];
+    sprintf(bpmStr, "%3d", bpm);
+    display.print(bpmStr);
+  } else {
+    display.print(" --");
+  }
   
-  // Right-align BPM (screen width 128, leave some margin)
-  int rightX = 118 - w;
-  display.setCursor(rightX, 25);
-  display.print(bpmText);
-  
-  // BPM label (position relative to BPM)
+  // BPM label on the right
   display.setTextSize(1);
-  display.setCursor(rightX + w + 5, 40);
+  display.setCursor(100, 40);
   display.println(F("BPM"));
   
   display.display();
 }
 
-
 void displayMenu() {
   display.clearDisplay();
+  
+  // Menu title
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
-  display.println(F("Hello World"));
+  display.println(F("Settings"));
+  
+  // Menu options
+  display.setTextSize(1);
+  display.setCursor(10, 20);
+  display.println(F("Offset"));
+  display.setCursor(10, 30);
+  display.println(F("Threshold"));
+  display.setCursor(10, 40);
+  display.println(F("Peak decay rate"));
+  display.setCursor(10, 50);
+  display.println(F("Through decay rate"));
+
   display.display();
 }
