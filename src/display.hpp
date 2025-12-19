@@ -41,6 +41,9 @@ private:
     static const int troughDecayMax = 100;
     static const int troughDecayStep = 1;
 
+    // Helper method for menu display
+    const char* getPrefix(MenuOption option) const;
+
 public:
     Display();
     void init();

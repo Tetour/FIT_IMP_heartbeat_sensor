@@ -62,35 +62,27 @@ void Display::showMenu() {
   
   // Offset option
   display.setCursor(0, 20);
-  if (currentSelection == MenuOption::OFFSET) {
-    display.printf("> Offset: %d", offsetValue);
-  } else {
-    display.printf("  Offset: %d", offsetValue);
-  }
+  display.printf("%sOffset:", getPrefix(MenuOption::OFFSET));
+  display.setCursor(100, 20);
+  display.printf("%4d", offsetValue);
   
   // Threshold option
   display.setCursor(0, 30);
-  if (currentSelection == MenuOption::THRESHOLD) {
-    display.printf("> Threshold: %d", thresholdValue);
-  } else {
-    display.printf("  Threshold: %d", thresholdValue);
-  }
+  display.printf("%sThreshold:", getPrefix(MenuOption::THRESHOLD));
+  display.setCursor(100, 30);
+  display.printf("%4d", thresholdValue);
   
   // Peak decay rate option
   display.setCursor(0, 40);
-  if (currentSelection == MenuOption::PEAK_DECAY) {
-    display.printf("> PDR: %d", peakDecayValue);
-  } else {
-    display.printf("  PDR: %d", peakDecayValue);
-  }
+  display.printf("%sPDR:", getPrefix(MenuOption::PEAK_DECAY));
+  display.setCursor(100, 40);
+  display.printf("%4d", peakDecayValue);
   
   // Through decay rate option
   display.setCursor(0, 50);
-  if (currentSelection == MenuOption::TROUGH_DECAY) {
-    display.printf("> TDR: %d", troughDecayValue);
-  } else {
-    display.printf("  TDR: %d", troughDecayValue);
-  }
+  display.printf("%sTDR:", getPrefix(MenuOption::TROUGH_DECAY));
+  display.setCursor(100, 50);
+  display.printf("%4d", troughDecayValue);
 
   display.display();
 }
@@ -145,4 +137,8 @@ void Display::handleRightMovement() {
     default:
       break;
   }
+}
+
+const char* Display::getPrefix(MenuOption option) const {
+  return (currentSelection == option) ? "> " : "  ";
 }
