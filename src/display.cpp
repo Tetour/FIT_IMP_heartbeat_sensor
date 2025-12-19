@@ -53,6 +53,17 @@ void Display::showMenu() {
   display.setCursor(0, 0);
   display.println(F("Settings"));
   
+  // Show BPM in top right corner
+  int currentBPM = sensor.getBPM();
+  display.setCursor(80, 0);
+  if (currentBPM > 0) {
+    display.printf("%3d", currentBPM);
+  } else {
+    display.print(" --");
+  }
+  display.setCursor(110, 0);
+  display.print(F("BPM"));
+  
   // Menu options with values
   display.setTextSize(1);
   
