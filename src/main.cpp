@@ -4,6 +4,9 @@
 #include "sensor.hpp"
 
 Display display;
+Joystick joystick;
+Sensor sensor;
+
 bool showMenu = false;
 
 void setup() {
@@ -11,16 +14,16 @@ void setup() {
   Serial.println("Starting...");
   
   display.init();
-  initJoystick();
-  initSensor();
+  joystick.init();
+  sensor.init();
 }
 
 void loop() {
-  updateJoystick();
-  updateSensor();
+  joystick.update();
+  sensor.update();
 
   // Toggle menu on middle button press (edge detection)
-  if (wasMidPressed()) {
+  if (joystick.wasMidPressed()) {
     showMenu = !showMenu;
     if (Serial) {
       Serial.print("Menu ");
@@ -34,7 +37,7 @@ void loop() {
     if (showMenu) {
       display.showMenu();
     } else {
-      int currentBPM = getBPM();
+      int currentBPM = sensor.getBPM();
       display.showBPM(currentBPM);
     }
     lastDisplayUpdate = millis();

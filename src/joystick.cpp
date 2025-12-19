@@ -1,34 +1,29 @@
 #include "joystick.hpp"
 
-// State tracking for edge detection
-static bool lastUpState = false;
-static bool lastDownState = false;
-static bool lastLeftState = false;
-static bool lastRightState = false;
-static bool lastMidState = false;
+Joystick::Joystick() :
+    lastUpState(false),
+    lastDownState(false),
+    lastLeftState(false),
+    lastRightState(false),
+    lastMidState(false),
+    upPressed(false),
+    downPressed(false),
+    leftPressed(false),
+    rightPressed(false),
+    midPressed(false),
+    upWasPressed(false),
+    downWasPressed(false),
+    leftWasPressed(false),
+    rightWasPressed(false),
+    midWasPressed(false),
+    lastUpDebounce(0),
+    lastDownDebounce(0),
+    lastLeftDebounce(0),
+    lastRightDebounce(0),
+    lastMidDebounce(0) {
+}
 
-// Current debounced states
-static bool upPressed = false;
-static bool downPressed = false;
-static bool leftPressed = false;
-static bool rightPressed = false;
-static bool midPressed = false;
-
-// Edge detection states (true until cleared by wasPressed functions)
-static bool upWasPressed = false;
-static bool downWasPressed = false;
-static bool leftWasPressed = false;
-static bool rightWasPressed = false;
-static bool midWasPressed = false;
-
-// Last debounce times
-static unsigned long lastUpDebounce = 0;
-static unsigned long lastDownDebounce = 0;
-static unsigned long lastLeftDebounce = 0;
-static unsigned long lastRightDebounce = 0;
-static unsigned long lastMidDebounce = 0;
-
-void initJoystick() {
+void Joystick::init() {
   pinMode(JOY_UP, INPUT_PULLUP);
   pinMode(JOY_DOWN, INPUT_PULLUP);
   pinMode(JOY_LEFT, INPUT_PULLUP);
@@ -36,16 +31,16 @@ void initJoystick() {
   pinMode(JOY_MID, INPUT_PULLUP);
 }
 
-void updateJoystick() {
+void Joystick::update() {
   unsigned long now = millis();
-  
+
   // Read current states
   bool upReading = digitalRead(JOY_UP) == LOW;
   bool downReading = digitalRead(JOY_DOWN) == LOW;
   bool leftReading = digitalRead(JOY_LEFT) == LOW;
   bool rightReading = digitalRead(JOY_RIGHT) == LOW;
   bool midReading = digitalRead(JOY_MID) == LOW;
-  
+
   // Debounce and detect edges for UP
   if (upReading != lastUpState) {
     lastUpDebounce = now;
@@ -60,7 +55,7 @@ void updateJoystick() {
     }
   }
   lastUpState = upReading;
-  
+
   // Debounce and detect edges for DOWN
   if (downReading != lastDownState) {
     lastDownDebounce = now;
@@ -75,7 +70,7 @@ void updateJoystick() {
     }
   }
   lastDownState = downReading;
-  
+
   // Debounce and detect edges for LEFT
   if (leftReading != lastLeftState) {
     lastLeftDebounce = now;
@@ -90,7 +85,7 @@ void updateJoystick() {
     }
   }
   lastLeftState = leftReading;
-  
+
   // Debounce and detect edges for RIGHT
   if (rightReading != lastRightState) {
     lastRightDebounce = now;
@@ -105,7 +100,7 @@ void updateJoystick() {
     }
   }
   lastRightState = rightReading;
-  
+
   // Debounce and detect edges for MID
   if (midReading != lastMidState) {
     lastMidDebounce = now;
@@ -122,51 +117,51 @@ void updateJoystick() {
   lastMidState = midReading;
 }
 
-bool isUpPressed() {
+bool Joystick::isUpPressed() {
   return upPressed;
 }
 
-bool isDownPressed() {
+bool Joystick::isDownPressed() {
   return downPressed;
 }
 
-bool isLeftPressed() {
+bool Joystick::isLeftPressed() {
   return leftPressed;
 }
 
-bool isRightPressed() {
+bool Joystick::isRightPressed() {
   return rightPressed;
 }
 
-bool isMidPressed() {
+bool Joystick::isMidPressed() {
   return midPressed;
 }
 
-bool wasUpPressed() {
+bool Joystick::wasUpPressed() {
   bool result = upWasPressed;
   upWasPressed = false;
   return result;
 }
 
-bool wasDownPressed() {
+bool Joystick::wasDownPressed() {
   bool result = downWasPressed;
   downWasPressed = false;
   return result;
 }
 
-bool wasLeftPressed() {
+bool Joystick::wasLeftPressed() {
   bool result = leftWasPressed;
   leftWasPressed = false;
   return result;
 }
 
-bool wasRightPressed() {
+bool Joystick::wasRightPressed() {
   bool result = rightWasPressed;
   rightWasPressed = false;
   return result;
 }
 
-bool wasMidPressed() {
+bool Joystick::wasMidPressed() {
   bool result = midWasPressed;
   midWasPressed = false;
   return result;
