@@ -8,8 +8,8 @@
 
 void initSensor();
 void updateSensor();
-int getBPM();                 // Get current BPM
+int  getBPM();                // Get current BPM
 bool isBeatDetected();        // Check if a heartbeat was just detected
-int getSignal();              // Get raw sensor signal value
+int  getSignal();             // Get raw sensor signal value
 
 #endif

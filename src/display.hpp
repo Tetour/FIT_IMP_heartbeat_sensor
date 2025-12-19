@@ -12,6 +12,7 @@
 extern Adafruit_SSD1306 display;
 
 void initDisplay();
-void printHelloWorld();
+void displayBPM(int bpm);
+void displayMenu();
 
 #endif
