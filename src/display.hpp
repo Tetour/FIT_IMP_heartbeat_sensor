@@ -8,10 +8,10 @@
 class Display {
 private:
     enum class MenuOption : int {
-        BPM_OFFSET = 0,
+        DATA_RECORDING = 0,
+        BPM_OFFSET,
         BEAT_THRESHOLD,
-        PEAK_DECAY,
-        TROUGH_DECAY,
+        DECAY_RATE,
         NUM_OF_OPTIONS
     };
 
@@ -26,8 +26,7 @@ private:
     
     static const int offsetStep = 1;
     static const int thresholdStep = 5;
-    static const int peakDecayStep = 1;
-    static const int troughDecayStep = 1;
+    static const int decayStep = 1;
 
     // Helper method for menu display
     const char* getPrefix(MenuOption option) const;

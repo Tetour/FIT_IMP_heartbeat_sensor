@@ -24,11 +24,16 @@ private:
     // Signal smoothing for console output over 3 values
     std::vector<int> signalHistory;
     
+    // Data recording control
+    bool recordingEnabled;
+    String recordingFilename;
+    
     // Configuration parameters
     int peakDecayRate;
     int troughDecayRate;
     int bpmOffset;
     int thresholdOffset;
+    bool debugOutput;
 
     // Configuration parameter defaults
     static const int DEFAULT_BPM_OFFSET = 0;
@@ -37,8 +42,8 @@ private:
     static const int DEFAULT_TROUGH_DECAY_RATE = 2;
 
     // Configuration parameter limits
-    static const int BPM_OFFSET_MIN = -50;
-    static const int BPM_OFFSET_MAX = 50;
+    static const int BPM_OFFSET_MIN = -100;
+    static const int BPM_OFFSET_MAX = 100;
     static const int THRESHOLD_OFFSET_MIN = -500;
     static const int THRESHOLD_OFFSET_MAX = 500;
     static const int PEAK_DECAY_MIN = 0;
@@ -54,6 +59,13 @@ public:
     bool isBeatDetected();        // Check if a heartbeat was just detected
     int  getSignal();             // Get raw sensor signal value
     int  getSmoothedSignal();     // Get smoothed signal value for console output
+    void saveSignalData(const char* filename); // Save current signal data to file
+    
+    // Data recording control
+    void startRecording(const char* filename = "/sensor_data.csv"); // Start recording data
+    void stopRecording();         // Stop recording data
+    bool isRecording() const;     // Check if currently recording
+    void dumpRecordedData();      // Output recorded data over serial for saving to computer
     
     // Sensor configuration
     int  getBpmOffset() const;
@@ -67,6 +79,13 @@ public:
 
     int  getTroughDecayRate() const;
     void setTroughDecayRate(int rate);
+
+    // Convenience method for UI - gets decay rate (assumes peak and trough are the same)
+    int  getDecayRate() const { return getPeakDecayRate(); }
+    void setDecayRate(int rate) { setPeakDecayRate(rate); setTroughDecayRate(rate); }
+
+    bool getDebugOutput() const;
+    void setDebugOutput(bool enable);
 
     // Configuration limits
     static int getBpmOffsetMin() { return BPM_OFFSET_MIN; }

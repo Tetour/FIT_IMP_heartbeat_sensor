@@ -22,6 +22,30 @@ void loop() {
   joystick.update();
   sensor.update();
 
+  // Check for serial commands
+  if (Serial.available()) {
+    String command = Serial.readStringUntil('\n');
+    command.trim();
+    
+    if (command == "DUMP") {
+      Serial.println("Dumping recorded data...");
+      sensor.dumpRecordedData();
+    } else if (command == "HELP") {
+      Serial.println("Available commands:");
+      Serial.println("  DUMP - Output recorded data to serial");
+      Serial.println("  HELP - Show this help message");
+    }
+  }
+
+  if (sensor.isRecording()) {
+    // Indicate recording status on Serial Monitor
+    static unsigned long lastRecordIndicator = 0;
+    if (millis() - lastRecordIndicator > 2000) {
+      Serial.println("Recording sensor data...");
+      lastRecordIndicator = millis();
+    }
+  }
+
   // Toggle menu on middle button press (edge detection)
   if (joystick.wasMidPressed()) {
     showMenu = !showMenu;
@@ -55,6 +79,24 @@ void loop() {
       display.handleRightMovement();
       if (Serial) {
         Serial.println("Menu: RIGHT movement (increase value)");
+      }
+    }
+  } else {
+    // Direct recording control when not in menu (BPM display mode)
+    if (joystick.wasLeftPressed()) {
+      if (!sensor.isRecording()) {
+        sensor.startRecording("/sensor_data.csv");
+        if (Serial) {
+          Serial.println("Recording started via LEFT joystick");
+        }
+      }
+    }
+    if (joystick.wasRightPressed()) {
+      if (sensor.isRecording()) {
+        sensor.stopRecording();
+        if (Serial) {
+          Serial.println("Recording stopped via RIGHT joystick");
+        }
       }
     }
   }
