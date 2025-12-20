@@ -1,11 +1,13 @@
 #pragma once
 
 #include <Arduino.h>
+#include <SPIFFS.h>
 
 class DataLogger {
 private:
     bool recordingEnabled;
     String recordingFilename;
+    File recordingFile;  // Keep file handle open during recording
 
 public:
     DataLogger();

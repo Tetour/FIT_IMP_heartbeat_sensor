@@ -1,6 +1,11 @@
 #include "joystick.hpp"
 
 Joystick::Joystick() :
+    JOY_UP_PIN(18),
+    JOY_DOWN_PIN(19),
+    JOY_LEFT_PIN(23),
+    JOY_RIGHT_PIN(5),
+    JOY_MID_PIN(13),
     lastUpState(false),
     lastDownState(false),
     lastLeftState(false),
@@ -26,22 +31,22 @@ Joystick::Joystick() :
 }
 
 void Joystick::init() {
-  pinMode(JOY_UP, INPUT_PULLUP);
-  pinMode(JOY_DOWN, INPUT_PULLUP);
-  pinMode(JOY_LEFT, INPUT_PULLUP);
-  pinMode(JOY_RIGHT, INPUT_PULLUP);
-  pinMode(JOY_MID, INPUT_PULLUP);
+  pinMode(JOY_UP_PIN, INPUT_PULLUP);
+  pinMode(JOY_DOWN_PIN, INPUT_PULLUP);
+  pinMode(JOY_LEFT_PIN, INPUT_PULLUP);
+  pinMode(JOY_RIGHT_PIN, INPUT_PULLUP);
+  pinMode(JOY_MID_PIN, INPUT_PULLUP);
 }
 
 void Joystick::update() {
   unsigned long now = millis();
 
   // Read current states
-  bool upReading = digitalRead(JOY_UP) == LOW;
-  bool downReading = digitalRead(JOY_DOWN) == LOW;
-  bool leftReading = digitalRead(JOY_LEFT) == LOW;
-  bool rightReading = digitalRead(JOY_RIGHT) == LOW;
-  bool midReading = digitalRead(JOY_MID) == LOW;
+  bool upReading = digitalRead(JOY_UP_PIN) == LOW;
+  bool downReading = digitalRead(JOY_DOWN_PIN) == LOW;
+  bool leftReading = digitalRead(JOY_LEFT_PIN) == LOW;
+  bool rightReading = digitalRead(JOY_RIGHT_PIN) == LOW;
+  bool midReading = digitalRead(JOY_MID_PIN) == LOW;
 
   // Debounce and detect edges for UP
   if (upReading != lastUpState) {

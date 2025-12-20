@@ -29,12 +29,10 @@ void DataLogger::startRecording(const char* filename) {
     }
   }
 
-  // Create file and write CSV header
-  File file = SPIFFS.open(filename, FILE_WRITE);
-  if (file) {
-    file.println("timestamp,signal,peak,trough,threshold,beat_detected,bpm");
-    file.close();
-
+  // Open file once and keep it open for the entire recording session
+  recordingFile = SPIFFS.open(filename, FILE_WRITE);
+  if (recordingFile) {
+    recordingFile.println("timestamp,signal,peak,trough,threshold,beat_detected,bpm");
     recordingEnabled = true;
 
     if (Serial) {
@@ -52,6 +50,11 @@ void DataLogger::startRecording(const char* filename) {
 
 void DataLogger::stopRecording() {
   recordingEnabled = false;
+
+  // Close the recording file
+  if (recordingFile) {
+    recordingFile.close();
+  }
 
   if (Serial) {
     Serial.println("Stopped recording data");
@@ -103,40 +106,28 @@ void DataLogger::dumpRecordedData() {
 
 void DataLogger::logData(unsigned long timestamp, int signal, int peak, int trough,
                         int threshold, bool beatDetected, int bpm) {
-  if (!recordingEnabled) {
+  if (!recordingEnabled || !recordingFile) {
     return;
   }
 
-  // Use the recording filename or default
-  const char* actualFilename = recordingFilename.length() > 0 ?
-                              recordingFilename.c_str() : "/sensor_data.csv";
+  // Write data to the already open file
+  recordingFile.print(timestamp);
+  recordingFile.print(",");
+  recordingFile.print(signal);
+  recordingFile.print(",");
+  recordingFile.print(peak);
+  recordingFile.print(",");
+  recordingFile.print(trough);
+  recordingFile.print(",");
+  recordingFile.print(threshold);
+  recordingFile.print(",");
+  recordingFile.print(beatDetected ? "1" : "0");
+  recordingFile.print(",");
+  recordingFile.println(bpm);
 
-  File file = SPIFFS.open(actualFilename, FILE_APPEND);
-  if (!file) {
-    // Only report error once per session to avoid console spam
-    static bool errorReported = false;
-    if (!errorReported && Serial) {
-      Serial.print("Failed to open file: ");
-      Serial.println(actualFilename);
-      errorReported = true;
-    }
-    return;
+  // Periodic flush for data integrity (every 100 writes)
+  static int writeCount = 0;
+  if (++writeCount % 100 == 0) {
+    recordingFile.flush();
   }
-
-  // Write relevant data in CSV format
-  file.print(timestamp);
-  file.print(",");
-  file.print(signal);
-  file.print(",");
-  file.print(peak);
-  file.print(",");
-  file.print(trough);
-  file.print(",");
-  file.print(threshold);
-  file.print(",");
-  file.print(beatDetected ? "1" : "0");
-  file.print(",");
-  file.println(bpm);
-
-  file.close();
 }

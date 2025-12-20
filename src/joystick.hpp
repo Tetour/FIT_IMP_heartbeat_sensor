@@ -2,14 +2,15 @@
 
 #include <Arduino.h>
 
-#define JOY_UP    18
-#define JOY_DOWN  19
-#define JOY_LEFT  23
-#define JOY_RIGHT  5
-#define JOY_MID   13
-
 class Joystick {
 private:
+    // Joystick pin definitions
+    const int JOY_UP_PIN;
+    const int JOY_DOWN_PIN;
+    const int JOY_LEFT_PIN;
+    const int JOY_RIGHT_PIN;
+    const int JOY_MID_PIN;
+
     // State tracking for edge detection
     bool lastUpState;
     bool lastDownState;
