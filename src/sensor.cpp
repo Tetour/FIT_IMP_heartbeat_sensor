@@ -3,7 +3,7 @@
 Sensor::Sensor() :
     sensorSignal(0),
     lastSignal(0),
-    threshold(DEFAULT_THRESHOLD),  // Default threshold value
+    thresholdOffset(DEFAULT_THRESHOLD_OFFSET),  // Default threshold value
     beatDetected(false),
     lastBeatTime(0),
     bpm(0),
@@ -12,7 +12,7 @@ Sensor::Sensor() :
     pulseDetected(false),
     peakDecayRate(DEFAULT_PEAK_DECAY_RATE),
     troughDecayRate(DEFAULT_TROUGH_DECAY_RATE),
-    offset(DEFAULT_OFFSET) {  // Default offset value
+    valueOffset(DEFAULT_VALUE_OFFSET) {  // Default offset value
 }
 
 void Sensor::init() {
@@ -23,7 +23,7 @@ void Sensor::init() {
 }
 
 void Sensor::update() {
-  sensorSignal = analogRead(PULSE_INPUT) + offset;  // Apply offset to sensor signal
+  sensorSignal = analogRead(PULSE_INPUT) + valueOffset;  // Apply offset to sensor signal
   beatDetected = false;
 
   // Track peaks and troughs for reference (but threshold is now manually set)
@@ -35,10 +35,10 @@ void Sensor::update() {
   }
 
   // Threshold is now manually configurable - no auto-adjustment
-  // threshold = (peakValue + troughValue) / 2;
+  // thresholdOffset is set manually via menu
 
   // Detect rising edge (beat)
-  if (sensorSignal > threshold && lastSignal <= threshold && !pulseDetected) {
+  if (sensorSignal > thresholdOffset && lastSignal <= thresholdOffset && !pulseDetected) {
     unsigned long now = millis();
     unsigned long timeSinceLastBeat = now - lastBeatTime;
 
@@ -66,7 +66,7 @@ void Sensor::update() {
   }
 
   // Reset pulse detection on falling edge
-  if (sensorSignal < threshold) {
+  if (sensorSignal < thresholdOffset) {
     pulseDetected = false;
   }
 
@@ -95,17 +95,18 @@ int Sensor::getSignal() {
   return sensorSignal;
 }
 
-// Decay rate configuration methods
+// Peak decay rate configuration methods
 void Sensor::setPeakDecayRate(int rate) {
   peakDecayRate = max(PEAK_DECAY_MIN, min(PEAK_DECAY_MAX, rate));
 }
 
-void Sensor::setTroughDecayRate(int rate) {
-  troughDecayRate = max(TROUGH_DECAY_MIN, min(TROUGH_DECAY_MAX, rate));
-}
-
 int Sensor::getPeakDecayRate() const {
   return peakDecayRate;
+}
+
+// Trough decay rate configuration methods
+void Sensor::setTroughDecayRate(int rate) {
+  troughDecayRate = max(TROUGH_DECAY_MIN, min(TROUGH_DECAY_MAX, rate));
 }
 
 int Sensor::getTroughDecayRate() const {
@@ -114,18 +115,18 @@ int Sensor::getTroughDecayRate() const {
 
 // Value offset configuration methods
 void Sensor::setValueOffset(int value) {
-  offset = max(OFFSET_MIN, min(OFFSET_MAX, value));
+  valueOffset = max(VALUE_OFFSET_MIN, min(VALUE_OFFSET_MAX, value));
 }
 
 int Sensor::getValueOffset() const {
-  return offset;
+  return valueOffset;
 }
 
 // Threshold offset configuration methods
 void Sensor::setThresholdOffset(int value) {
-  threshold = max(THRESHOLD_MIN, min(THRESHOLD_MAX, value));
+  thresholdOffset = max(THRESHOLD_OFFSET_MIN, min(THRESHOLD_OFFSET_MAX, value));
 }
 
 int Sensor::getThresholdOffset() const {
-  return threshold;
+  return thresholdOffset;
 }

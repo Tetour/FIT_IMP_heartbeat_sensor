@@ -20,24 +20,24 @@ private:
     // Configuration parameters
     int peakDecayRate;
     int troughDecayRate;
-    int offset;
-    int threshold;
+    int valueOffset;
+    int thresholdOffset;
 
     // Configuration parameter defaults
-    static const int DEFAULT_THRESHOLD = 550;
+    static const int DEFAULT_VALUE_OFFSET = 0;
+    static const int DEFAULT_THRESHOLD_OFFSET = 550;
     static const int DEFAULT_PEAK_DECAY_RATE = 2;
     static const int DEFAULT_TROUGH_DECAY_RATE = 2;
-    static const int DEFAULT_OFFSET = 0;
 
     // Configuration parameter limits
+    static const int VALUE_OFFSET_MIN = -1000;
+    static const int VALUE_OFFSET_MAX = 1000;
+    static const int THRESHOLD_OFFSET_MIN = 0;
+    static const int THRESHOLD_OFFSET_MAX = 1023;
     static const int PEAK_DECAY_MIN = 0;
     static const int PEAK_DECAY_MAX = 100;
     static const int TROUGH_DECAY_MIN = 0;
     static const int TROUGH_DECAY_MAX = 100;
-    static const int OFFSET_MIN = 0;
-    static const int OFFSET_MAX = 100;
-    static const int THRESHOLD_MIN = 0;
-    static const int THRESHOLD_MAX = 1023;
 
 public:
     Sensor();
@@ -61,11 +61,11 @@ public:
     void setTroughDecayRate(int rate);
 
     // Configuration limits
-    static int getValueOffsetMin() { return OFFSET_MIN; }
-    static int getValueOffsetMax() { return OFFSET_MAX; }
+    static int getValueOffsetMin() { return VALUE_OFFSET_MIN; }
+    static int getValueOffsetMax() { return VALUE_OFFSET_MAX; }
 
-    static int getThresholdOffsetMin() { return THRESHOLD_MIN; }
-    static int getThresholdOffsetMax() { return THRESHOLD_MAX; }
+    static int getThresholdOffsetMin() { return THRESHOLD_OFFSET_MIN; }
+    static int getThresholdOffsetMax() { return THRESHOLD_OFFSET_MAX; }
 
     static int getPeakDecayMin() { return PEAK_DECAY_MIN; }
     static int getPeakDecayMax() { return PEAK_DECAY_MAX; }

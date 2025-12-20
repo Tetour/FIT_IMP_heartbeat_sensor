@@ -63,7 +63,7 @@ void Display::showMenu() {
   }
   display.setCursor(110, 0);
   display.print(F("BPM"));
-  
+
   // Menu options with values
   display.setTextSize(1);
   
