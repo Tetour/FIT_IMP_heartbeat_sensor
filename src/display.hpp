@@ -24,7 +24,7 @@ private:
     Adafruit_SSD1306 display;
     Sensor& sensor;
     
-    static const int offsetStep = 1;
+    static const int offsetStep = 5;
     static const int thresholdStep = 5;
     static const int decayStep = 1;
 

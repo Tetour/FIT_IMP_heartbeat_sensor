@@ -201,6 +201,11 @@ void Sensor::saveSignalData(const char* filename) {
 
   // Write timestamp and signal data (CSV format)
   unsigned long timestamp = millis();
+  
+  // Calculate current threshold (same as in update method)
+  int autoThreshold = (peakValue + troughValue) / 2;
+  int effectiveThreshold = autoThreshold + thresholdOffset;
+  
   file.print(timestamp);
   file.print(",");
   file.print(sensorSignal);
@@ -209,9 +214,11 @@ void Sensor::saveSignalData(const char* filename) {
   file.print(",");
   file.print(troughValue);
   file.print(",");
-  file.print(getBPM());
+  file.print(effectiveThreshold);
   file.print(",");
-  file.println(beatDetected ? "1" : "0");
+  file.print(beatDetected ? "1" : "0");
+  file.print(",");
+  file.println(getBPM());
 
   file.close();
   
@@ -232,7 +239,7 @@ void Sensor::startRecording(const char* filename) {
   // Create file and write CSV header
   File file = SPIFFS.open(filename, FILE_WRITE);
   if (file) {
-    file.println("timestamp,signal,peak,trough,bpm,beat_detected");
+    file.println("timestamp,signal,peak,trough,threshold,beat_detected,bpm");
     file.close();
     
     recordingEnabled = true;

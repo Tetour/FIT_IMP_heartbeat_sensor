@@ -16,4 +16,8 @@ monitor:
 clean:
 	$(PIO) run -t clean
 
-.PHONY: all build upload flash monitor clean
+venv:
+	python3 -m venv venv
+	./venv/bin/pip install pandas matplotlib
+
+.PHONY: all build upload flash monitor clean venv

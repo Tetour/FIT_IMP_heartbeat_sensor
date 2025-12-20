@@ -36,14 +36,14 @@ private:
     bool debugOutput;
 
     // Configuration parameter defaults
-    static const int DEFAULT_BPM_OFFSET = 0;
+    static const int DEFAULT_BPM_OFFSET = -130;
     static const int DEFAULT_THRESHOLD_OFFSET = 0;
     static const int DEFAULT_PEAK_DECAY_RATE = 2;
     static const int DEFAULT_TROUGH_DECAY_RATE = 2;
 
     // Configuration parameter limits
-    static const int BPM_OFFSET_MIN = -100;
-    static const int BPM_OFFSET_MAX = 100;
+    static const int BPM_OFFSET_MIN = -150;
+    static const int BPM_OFFSET_MAX = 150;
     static const int THRESHOLD_OFFSET_MIN = -500;
     static const int THRESHOLD_OFFSET_MAX = 500;
     static const int PEAK_DECAY_MIN = 0;

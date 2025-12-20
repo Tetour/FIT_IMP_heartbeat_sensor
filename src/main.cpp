@@ -82,20 +82,17 @@ void loop() {
       }
     }
   } else {
-    // Direct recording control when not in menu (BPM display mode)
-    if (joystick.wasLeftPressed()) {
-      if (!sensor.isRecording()) {
-        sensor.startRecording("/sensor_data.csv");
-        if (Serial) {
-          Serial.println("Recording started via LEFT joystick");
-        }
-      }
-    }
-    if (joystick.wasRightPressed()) {
+    // Direct recording toggle when not in menu (BPM display mode)
+    if (joystick.wasLeftPressed() || joystick.wasRightPressed()) {
       if (sensor.isRecording()) {
         sensor.stopRecording();
         if (Serial) {
-          Serial.println("Recording stopped via RIGHT joystick");
+          Serial.println("Recording stopped via joystick");
+        }
+      } else {
+        sensor.startRecording("/sensor_data.csv");
+        if (Serial) {
+          Serial.println("Recording started via joystick");
         }
       }
     }
