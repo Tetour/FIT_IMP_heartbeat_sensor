@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <vector>
+#include "data_logger.hpp"
 
 class Sensor {
 private:
@@ -24,9 +25,8 @@ private:
     // Signal smoothing for console output over 3 values
     std::vector<int> signalHistory;
     
-    // Data recording control
-    bool recordingEnabled;
-    String recordingFilename;
+    // Data logger instance
+    DataLogger dataLogger;
     
     // Configuration parameters
     int peakDecayRate;
@@ -59,13 +59,12 @@ public:
     bool isBeatDetected();        // Check if a heartbeat was just detected
     int  getSignal();             // Get raw sensor signal value
     int  getSmoothedSignal();     // Get smoothed signal value for console output
-    void saveSignalData(const char* filename); // Save current signal data to file
     
     // Data recording control
-    void startRecording(const char* filename = "/sensor_data.csv"); // Start recording data
-    void stopRecording();         // Stop recording data
-    bool isRecording() const;     // Check if currently recording
-    void dumpRecordedData();      // Output recorded data over serial for saving to computer
+    void startRecording(const char* filename = "/sensor_data.csv") { dataLogger.startRecording(filename); }
+    void stopRecording() { dataLogger.stopRecording(); }
+    bool isRecording() const { return dataLogger.isRecording(); }
+    void dumpRecordedData() { dataLogger.dumpRecordedData(); }
     
     // Sensor configuration
     int  getBpmOffset() const;

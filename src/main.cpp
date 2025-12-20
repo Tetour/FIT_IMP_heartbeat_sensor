@@ -82,7 +82,7 @@ void loop() {
       }
     }
   } else {
-    // Direct recording toggle when not in menu (BPM display mode)
+    // Direct recording toggle when in BPM display mode
     if (joystick.wasLeftPressed() || joystick.wasRightPressed()) {
       if (sensor.isRecording()) {
         sensor.stopRecording();

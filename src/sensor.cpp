@@ -14,30 +14,19 @@ Sensor::Sensor() :
     peakDecayRate(DEFAULT_PEAK_DECAY_RATE),
     troughDecayRate(DEFAULT_TROUGH_DECAY_RATE),
     bpmOffset(DEFAULT_BPM_OFFSET),  // Default BPM offset value
-    recordingEnabled(false),  // Default recording state
     debugOutput(false) {  // Default debug output disabled
 }
 
 void Sensor::init() {
   pinMode(PULSE_INPUT, INPUT);
-  
-  // Initialize SPIFFS
-  if (!SPIFFS.begin(true)) {
-    if (Serial) {
-      Serial.println("SPIFFS initialization failed!");
-    }
-  } else {
-    if (Serial) {
-      Serial.println("SPIFFS initialized successfully");
-    }
-  }
-  
+
+  // Initialize data logger (which initializes SPIFFS)
+  dataLogger.init();
+
   if (Serial) {
     Serial.println("Pulse sensor initialized on GPIO 34");
   }
-}
-
-void Sensor::update() {
+}void Sensor::update() {
   sensorSignal = analogRead(PULSE_INPUT);  // Read raw sensor signal
   
   // Maintain signal history for console smoothing (keep only last 3)
@@ -124,8 +113,14 @@ void Sensor::update() {
   }
 
   // Save data to file if recording is enabled
-  if (recordingEnabled) {
-    saveSignalData(nullptr);  // Use stored filename
+  if (dataLogger.isRecording()) {
+    // Calculate current threshold
+    int autoThreshold = (peakValue + troughValue) / 2;
+    int effectiveThreshold = autoThreshold + thresholdOffset;
+
+    // Log data using DataLogger
+    dataLogger.logData(millis(), sensorSignal, peakValue, troughValue,
+                      effectiveThreshold, beatDetected, getBPM());
   }
 
   lastSignal = sensorSignal;
@@ -176,136 +171,6 @@ int Sensor::getSmoothedSignal() {
   }
   
   return sum / signalHistory.size();
-}
-
-void Sensor::saveSignalData(const char* filename) {
-  // Use stored filename if none provided
-  const char* actualFilename = filename ? filename : recordingFilename.c_str();
-  
-  if (!actualFilename || strlen(actualFilename) == 0) {
-    return;  // Silent fail - avoid console spam
-  }
-  
-  // Open file for appending
-  File file = SPIFFS.open(actualFilename, FILE_APPEND);
-  if (!file) {
-    // Only report error once per session to avoid console spam
-    static bool errorReported = false;
-    if (!errorReported && Serial) {
-      Serial.print("Failed to open file: ");
-      Serial.println(actualFilename);
-      errorReported = true;
-    }
-    return;
-  }
-
-  // Write timestamp and signal data (CSV format)
-  unsigned long timestamp = millis();
-  
-  // Calculate current threshold (same as in update method)
-  int autoThreshold = (peakValue + troughValue) / 2;
-  int effectiveThreshold = autoThreshold + thresholdOffset;
-  
-  file.print(timestamp);
-  file.print(",");
-  file.print(sensorSignal);
-  file.print(",");
-  file.print(peakValue);
-  file.print(",");
-  file.print(troughValue);
-  file.print(",");
-  file.print(effectiveThreshold);
-  file.print(",");
-  file.print(beatDetected ? "1" : "0");
-  file.print(",");
-  file.println(getBPM());
-
-  file.close();
-  
-  // No console output here - would spam serial at 50Hz
-}
-
-void Sensor::startRecording(const char* filename) {
-  recordingFilename = filename;
-  
-  // Delete existing file and create new one with CSV header
-  if (SPIFFS.exists(filename)) {
-    SPIFFS.remove(filename);
-    if (Serial) {
-      Serial.println("Cleared existing data file");
-    }
-  }
-  
-  // Create file and write CSV header
-  File file = SPIFFS.open(filename, FILE_WRITE);
-  if (file) {
-    file.println("timestamp,signal,peak,trough,threshold,beat_detected,bpm");
-    file.close();
-    
-    recordingEnabled = true;
-    
-    if (Serial) {
-      Serial.print("Started recording data to: ");
-      Serial.println(filename);
-      Serial.println("NOTE: Data is saved to ESP32 SPIFFS filesystem");
-    }
-  } else {
-    if (Serial) {
-      Serial.print("Failed to create recording file: ");
-      Serial.println(filename);
-    }
-  }
-}
-
-void Sensor::stopRecording() {
-  recordingEnabled = false;
-  
-  if (Serial) {
-    Serial.println("Stopped recording data");
-    Serial.println("Auto-dumping data...");
-  }
-  
-  // Automatically dump recorded data when stopping
-  dumpRecordedData();
-}
-
-bool Sensor::isRecording() const {
-  return recordingEnabled;
-}
-
-void Sensor::dumpRecordedData() {
-  if (!recordingFilename.length()) {
-    if (Serial) {
-      Serial.println("ERROR: No recording filename set");
-    }
-    return;
-  }
-
-  File file = SPIFFS.open(recordingFilename.c_str(), FILE_READ);
-  if (!file) {
-    if (Serial) {
-      Serial.print("ERROR: Failed to open file for reading: ");
-      Serial.println(recordingFilename);
-    }
-    return;
-  }
-
-  if (Serial) {
-    Serial.println("===DATA_START===");
-  }
-
-  while (file.available()) {
-    String line = file.readStringUntil('\n');
-    if (Serial) {
-      Serial.println(line);
-    }
-  }
-
-  file.close();
-
-  if (Serial) {
-    Serial.println("===DATA_END===");
-  }
 }
 
 // Peak decay rate configuration methods

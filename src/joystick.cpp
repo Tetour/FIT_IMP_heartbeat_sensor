@@ -20,7 +20,9 @@ Joystick::Joystick() :
     lastDownDebounce(0),
     lastLeftDebounce(0),
     lastRightDebounce(0),
-    lastMidDebounce(0) {
+    lastMidDebounce(0),
+    debugOutput(false),
+    DEBOUNCE_DELAY(50) {
 }
 
 void Joystick::init() {
@@ -49,7 +51,7 @@ void Joystick::update() {
     if (upReading != upPressed) {
       upPressed = upReading;
       upWasPressed = upPressed;  // Set edge detection flag
-      if (upPressed && Serial) {
+      if (upPressed && debugOutput && Serial) {
         Serial.println("UP pressed");
       }
     }
@@ -64,7 +66,7 @@ void Joystick::update() {
     if (downReading != downPressed) {
       downPressed = downReading;
       downWasPressed = downPressed;
-      if (downPressed && Serial) {
+      if (downPressed && debugOutput && Serial) {
         Serial.println("DOWN pressed");
       }
     }
@@ -79,7 +81,7 @@ void Joystick::update() {
     if (leftReading != leftPressed) {
       leftPressed = leftReading;
       leftWasPressed = leftPressed;
-      if (leftPressed && Serial) {
+      if (leftPressed && debugOutput && Serial) {
         Serial.println("LEFT pressed");
       }
     }
@@ -94,7 +96,7 @@ void Joystick::update() {
     if (rightReading != rightPressed) {
       rightPressed = rightReading;
       rightWasPressed = rightPressed;
-      if (rightPressed && Serial) {
+      if (rightPressed && debugOutput && Serial) {
         Serial.println("RIGHT pressed");
       }
     }
@@ -109,7 +111,7 @@ void Joystick::update() {
     if (midReading != midPressed) {
       midPressed = midReading;
       midWasPressed = midPressed;
-      if (midPressed && Serial) {
+      if (midPressed && debugOutput && Serial) {
         Serial.println("MID pressed");
       }
     }
@@ -165,4 +167,13 @@ bool Joystick::wasMidPressed() {
   bool result = midWasPressed;
   midWasPressed = false;
   return result;
+}
+
+// Debug output control
+bool Joystick::getDebugOutput() const {
+  return debugOutput;
+}
+
+void Joystick::setDebugOutput(bool enable) {
+  debugOutput = enable;
 }

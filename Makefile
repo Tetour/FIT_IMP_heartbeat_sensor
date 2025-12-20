@@ -15,9 +15,14 @@ monitor:
 
 clean:
 	$(PIO) run -t clean
+	rm -f data/**/*.png
 
 venv:
 	python3 -m venv venv
 	./venv/bin/pip install pandas matplotlib
 
-.PHONY: all build upload flash monitor clean venv
+plot:
+	./scripts/plot_sensor_data.py data/measurements
+	./scripts/plot_sensor_data.py data/examples
+
+.PHONY: all build upload flash monitor clean venv plot
