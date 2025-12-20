@@ -2,7 +2,7 @@
 
 Display::Display(Sensor& sensorRef) : 
     display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET),
-    currentSelection(MenuOption::OFFSET),
+    currentSelection(MenuOption::BPM_OFFSET),
     sensor(sensorRef) {
 }
 
@@ -69,9 +69,9 @@ void Display::showMenu() {
   
   // Offset option
   display.setCursor(0, 20);
-  display.printf("%sValue offset:", getPrefix(MenuOption::OFFSET));
+  display.printf("%sBPM offset:", getPrefix(MenuOption::BPM_OFFSET));
   display.setCursor(100, 20);
-  display.printf("%4d", sensor.getValueOffset());
+  display.printf("%4d", sensor.getBpmOffset());
   
   // Threshold option
   display.setCursor(0, 30);
@@ -110,9 +110,9 @@ void Display::handleDownMovement() {
 
 void Display::handleLeftMovement() {
   switch (currentSelection) {
-    case MenuOption::OFFSET: {
-      int currentValue = sensor.getValueOffset();
-      sensor.setValueOffset(max(Sensor::getValueOffsetMin(), currentValue - offsetStep));
+    case MenuOption::BPM_OFFSET: {
+      int currentValue = sensor.getBpmOffset();
+      sensor.setBpmOffset(max(Sensor::getBpmOffsetMin(), currentValue - offsetStep));
       break;
     }
     case MenuOption::BEAT_THRESHOLD: {
@@ -137,9 +137,9 @@ void Display::handleLeftMovement() {
 
 void Display::handleRightMovement() {
   switch (currentSelection) {
-    case MenuOption::OFFSET: {
-      int currentValue = sensor.getValueOffset();
-      sensor.setValueOffset(min(Sensor::getValueOffsetMax(), currentValue + offsetStep));
+    case MenuOption::BPM_OFFSET: {
+      int currentValue = sensor.getBpmOffset();
+      sensor.setBpmOffset(min(Sensor::getBpmOffsetMax(), currentValue + offsetStep));
       break;
     }
     case MenuOption::BEAT_THRESHOLD: {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <vector>
 
 class Sensor {
 private:
@@ -17,23 +18,29 @@ private:
     bool beatDetected;
     bool pulseDetected;
     
+    // BPM smoothing over 100 beats
+    std::vector<int> bpmHistory;
+    
+    // Signal smoothing for console output over 3 values
+    std::vector<int> signalHistory;
+    
     // Configuration parameters
     int peakDecayRate;
     int troughDecayRate;
-    int valueOffset;
+    int bpmOffset;
     int thresholdOffset;
 
     // Configuration parameter defaults
-    static const int DEFAULT_VALUE_OFFSET = 0;
-    static const int DEFAULT_THRESHOLD_OFFSET = 550;
+    static const int DEFAULT_BPM_OFFSET = 0;
+    static const int DEFAULT_THRESHOLD_OFFSET = 0;
     static const int DEFAULT_PEAK_DECAY_RATE = 2;
     static const int DEFAULT_TROUGH_DECAY_RATE = 2;
 
     // Configuration parameter limits
-    static const int VALUE_OFFSET_MIN = -1000;
-    static const int VALUE_OFFSET_MAX = 1000;
-    static const int THRESHOLD_OFFSET_MIN = 0;
-    static const int THRESHOLD_OFFSET_MAX = 1023;
+    static const int BPM_OFFSET_MIN = -50;
+    static const int BPM_OFFSET_MAX = 50;
+    static const int THRESHOLD_OFFSET_MIN = -500;
+    static const int THRESHOLD_OFFSET_MAX = 500;
     static const int PEAK_DECAY_MIN = 0;
     static const int PEAK_DECAY_MAX = 100;
     static const int TROUGH_DECAY_MIN = 0;
@@ -46,10 +53,11 @@ public:
     int  getBPM();                // Get current BPM
     bool isBeatDetected();        // Check if a heartbeat was just detected
     int  getSignal();             // Get raw sensor signal value
+    int  getSmoothedSignal();     // Get smoothed signal value for console output
     
     // Sensor configuration
-    int  getValueOffset() const;
-    void setValueOffset(int value);
+    int  getBpmOffset() const;
+    void setBpmOffset(int value);
 
     int  getThresholdOffset() const;
     void setThresholdOffset(int value);
@@ -61,8 +69,8 @@ public:
     void setTroughDecayRate(int rate);
 
     // Configuration limits
-    static int getValueOffsetMin() { return VALUE_OFFSET_MIN; }
-    static int getValueOffsetMax() { return VALUE_OFFSET_MAX; }
+    static int getBpmOffsetMin() { return BPM_OFFSET_MIN; }
+    static int getBpmOffsetMax() { return BPM_OFFSET_MAX; }
 
     static int getThresholdOffsetMin() { return THRESHOLD_OFFSET_MIN; }
     static int getThresholdOffsetMax() { return THRESHOLD_OFFSET_MAX; }

@@ -12,7 +12,7 @@ Sensor::Sensor() :
     pulseDetected(false),
     peakDecayRate(DEFAULT_PEAK_DECAY_RATE),
     troughDecayRate(DEFAULT_TROUGH_DECAY_RATE),
-    valueOffset(DEFAULT_VALUE_OFFSET) {  // Default offset value
+    bpmOffset(DEFAULT_BPM_OFFSET) {  // Default BPM offset value
 }
 
 void Sensor::init() {
@@ -23,10 +23,17 @@ void Sensor::init() {
 }
 
 void Sensor::update() {
-  sensorSignal = analogRead(PULSE_INPUT) + valueOffset;  // Apply offset to sensor signal
+  sensorSignal = analogRead(PULSE_INPUT);  // Read raw sensor signal
+  
+  // Maintain signal history for console smoothing (keep only last 3)
+  signalHistory.push_back(sensorSignal);
+  if (signalHistory.size() > 3) {
+    signalHistory.erase(signalHistory.begin());
+  }
+  
   beatDetected = false;
 
-  // Track peaks and troughs for reference (but threshold is now manually set)
+  // Track peaks and troughs for adaptive threshold
   if (sensorSignal > peakValue) {
     peakValue = sensorSignal;
   }
@@ -34,11 +41,15 @@ void Sensor::update() {
     troughValue = sensorSignal;
   }
 
-  // Threshold is now manually configurable - no auto-adjustment
-  // thresholdOffset is set manually via menu
+  // Auto-adjust threshold based on peak and trough
+  // Use midpoint between peak and trough as the threshold
+  int autoThreshold = (peakValue + troughValue) / 2;
+  
+  // Apply manual offset to the auto threshold
+  int effectiveThreshold = autoThreshold + thresholdOffset;
 
   // Detect rising edge (beat)
-  if (sensorSignal > thresholdOffset && lastSignal <= thresholdOffset && !pulseDetected) {
+  if (sensorSignal > effectiveThreshold && lastSignal <= effectiveThreshold && !pulseDetected) {
     unsigned long now = millis();
     unsigned long timeSinceLastBeat = now - lastBeatTime;
 
@@ -48,25 +59,24 @@ void Sensor::update() {
       pulseDetected = true;
 
       // Calculate BPM
-      bpm = 60000 / timeSinceLastBeat;
+      int currentBPM = 60000 / timeSinceLastBeat;
 
       // Clamp BPM to reasonable range
-      if (bpm < 40) bpm = 0;
-      if (bpm > 200) bpm = 0;
+      if (currentBPM < 40) currentBPM = 0;
+      if (currentBPM > 200) currentBPM = 0;
+
+      // Store BPM in history for smoothing (keep only last 100)
+      bpmHistory.push_back(currentBPM);
+      if (bpmHistory.size() > 100) {
+        bpmHistory.erase(bpmHistory.begin());
+      }
 
       lastBeatTime = now;
-
-      if (Serial && bpm > 0) {
-        Serial.print("BPM: ");
-        Serial.print(bpm);
-        Serial.print(" Signal: ");
-        Serial.println(sensorSignal);
-      }
     }
   }
 
   // Reset pulse detection on falling edge
-  if (sensorSignal < thresholdOffset) {
+  if (sensorSignal < effectiveThreshold) {
     pulseDetected = false;
   }
 
@@ -76,6 +86,28 @@ void Sensor::update() {
   if (peakValue < sensorSignal) peakValue = sensorSignal;
   if (troughValue > sensorSignal) troughValue = sensorSignal;
 
+  // Comprehensive debug output every 100ms to avoid flooding
+  static unsigned long lastDebugTime = 0;
+  if (Serial && millis() - lastDebugTime > 100) {
+    Serial.print("Signal: ");
+    Serial.print(getSmoothedSignal());
+    Serial.print(" Peak: ");
+    Serial.print(peakValue);
+    Serial.print(" Trough: ");
+    Serial.print(troughValue);
+    Serial.print(" AutoThreshold: ");
+    Serial.print(autoThreshold);
+    Serial.print(" Offset: ");
+    Serial.print(thresholdOffset);
+    Serial.print(" EffectiveThreshold: ");
+    Serial.print(effectiveThreshold);
+    Serial.print(" PulseState: ");
+    Serial.print(pulseDetected ? "HIGH" : "LOW");
+    Serial.print(" BPM: ");
+    Serial.println(getBPM());
+    lastDebugTime = millis();
+  }
+
   lastSignal = sensorSignal;
 }
 
@@ -84,7 +116,25 @@ int Sensor::getBPM() {
   if (millis() - lastBeatTime > 3000) {
     return 0;
   }
-  return bpm;
+  
+  // Calculate average BPM over available history
+  if (bpmHistory.empty()) {
+    return 0;
+  }
+  
+  int sum = 0;
+  int validCount = 0;
+  for (int bpmValue : bpmHistory) {
+    if (bpmValue > 0) {  // Only count valid BPM readings
+      sum += bpmValue;
+      validCount++;
+    }
+  }
+  
+  int averageBPM = validCount > 0 ? sum / validCount : 0;
+  
+  // Apply BPM offset
+  return max(0, averageBPM + bpmOffset);
 }
 
 bool Sensor::isBeatDetected() {
@@ -93,6 +143,19 @@ bool Sensor::isBeatDetected() {
 
 int Sensor::getSignal() {
   return sensorSignal;
+}
+
+int Sensor::getSmoothedSignal() {
+  if (signalHistory.empty()) {
+    return sensorSignal;
+  }
+  
+  int sum = 0;
+  for (int signal : signalHistory) {
+    sum += signal;
+  }
+  
+  return sum / signalHistory.size();
 }
 
 // Peak decay rate configuration methods
@@ -113,13 +176,13 @@ int Sensor::getTroughDecayRate() const {
   return troughDecayRate;
 }
 
-// Value offset configuration methods
-void Sensor::setValueOffset(int value) {
-  valueOffset = max(VALUE_OFFSET_MIN, min(VALUE_OFFSET_MAX, value));
+// BPM offset configuration methods
+void Sensor::setBpmOffset(int value) {
+  bpmOffset = max(BPM_OFFSET_MIN, min(BPM_OFFSET_MAX, value));
 }
 
-int Sensor::getValueOffset() const {
-  return valueOffset;
+int Sensor::getBpmOffset() const {
+  return bpmOffset;
 }
 
 // Threshold offset configuration methods

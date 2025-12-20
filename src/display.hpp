@@ -8,7 +8,7 @@
 class Display {
 private:
     enum class MenuOption : int {
-        OFFSET = 0,
+        BPM_OFFSET = 0,
         BEAT_THRESHOLD,
         PEAK_DECAY,
         TROUGH_DECAY,
