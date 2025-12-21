@@ -118,18 +118,18 @@ def plot_file_on_axis(csv_file, ax):
 
         # Plot peak and trough if available
         if 'peak' in df.columns:
-            ax.plot(df[timestamp_col] - time_offset, df['peak'], color='red', linewidth=1,
+            ax.plot(df[timestamp_col] - time_offset, df['peak'], color='green', linewidth=1,
                    label='Peak', alpha=0.8)
         if 'trough' in df.columns:
-            ax.plot(df[timestamp_col] - time_offset, df['trough'], color='blue', linewidth=1,
+            ax.plot(df[timestamp_col] - time_offset, df['trough'], color='orange', linewidth=1,
                    label='Trough', alpha=0.8)
 
         # Plot beat detected markers
         if 'beat_detected' in df.columns:
             beats = df[df['beat_detected'] == 1]
             if not beats.empty:
-                ax.scatter(beats[timestamp_col] - time_offset, beats[signal_col], color='green', s=10,
-                          label='Beats Detected', alpha=0.8)
+                ax.scatter(beats[timestamp_col] - time_offset, beats[signal_col], color='red', s=30,
+                          label='Beats Detected', alpha=0.9)
 
         ax.legend()
 

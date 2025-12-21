@@ -4,3 +4,6 @@ venv/
 
 # Generated plot images in data directories
 data/**/*.png
+
+# Measurement data files
+data/measurements/

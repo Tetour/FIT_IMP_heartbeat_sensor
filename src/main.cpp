@@ -21,28 +21,6 @@ void loop() {
   joystick.update();
   sensor.update();
 
-  // Check for serial commands
-  if (Serial.available()) {
-    String command = Serial.readStringUntil('\n');
-    command.trim();
-    
-    if (command == "DUMP") {
-      sensor.dumpRecordedData();
-    } else if (command == "HELP") {
-      Serial.println("Available commands:");
-      Serial.println("  DUMP - Output recorded data to serial");
-      Serial.println("  HELP - Show this help message");
-    }
-  }
-
-  if (sensor.isRecording()) {
-    // Indicate recording status on Serial Monitor
-    static unsigned long lastRecordIndicator = 0;
-    if (millis() - lastRecordIndicator > 2000) {
-      lastRecordIndicator = millis();
-    }
-  }
-
   // Toggle menu on middle button press (edge detection)
   if (joystick.wasMidPressed()) {
     showMenu = !showMenu;
@@ -85,5 +63,5 @@ void loop() {
     lastDisplayUpdate = millis();
   }
 
-  delay(20);
+  delay(50);
 }

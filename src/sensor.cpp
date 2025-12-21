@@ -69,9 +69,9 @@ void Sensor::init() {
       if (currentBPM < 40) currentBPM = 0;
       if (currentBPM > 200) currentBPM = 0;
 
-      // Store BPM in history for smoothing (keep only last 100)
+      // Store BPM in history for smoothing (keep only last 10)
       bpmHistory.push_back(currentBPM);
-      if (bpmHistory.size() > 100) {
+      if (bpmHistory.size() > 10) {
         bpmHistory.erase(bpmHistory.begin());
       }
 
@@ -94,19 +94,19 @@ void Sensor::init() {
   static unsigned long lastDebugTime = 0;
   if (debugOutput && Serial && millis() - lastDebugTime > 100) {
     Serial.print("Signal: ");
-    Serial.print(getSmoothedSignal());
+    Serial.printf("%4d", getSmoothedSignal());
     Serial.print(" Peak: ");
-    Serial.print(peakValue);
+    Serial.printf("%4d", peakValue);
     Serial.print(" Trough: ");
-    Serial.print(troughValue);
+    Serial.printf("%4d", troughValue);
     Serial.print(" AutoThreshold: ");
-    Serial.print(autoThreshold);
+    Serial.printf("%4d", autoThreshold);
     Serial.print(" Offset: ");
     Serial.print(thresholdOffset);
     Serial.print(" EffectiveThreshold: ");
-    Serial.print(effectiveThreshold);
+    Serial.printf("%4d", effectiveThreshold);
     Serial.print(" PulseState: ");
-    Serial.print(pulseDetected ? "HIGH" : "LOW");
+    Serial.print(pulseDetected ? "HIGH" : "LOW ");
     Serial.print(" BPM: ");
     Serial.println(getBPM());
     lastDebugTime = millis();
@@ -114,11 +114,6 @@ void Sensor::init() {
 
   // Save data to file if recording is enabled
   if (dataLogger.isRecording()) {
-    // Calculate current threshold
-    int autoThreshold = (peakValue + troughValue) / 2;
-    int effectiveThreshold = autoThreshold + thresholdOffset;
-
-    // Log data using DataLogger
     dataLogger.logData(millis(), sensorSignal, peakValue, troughValue,
                       effectiveThreshold, beatDetected, getBPM());
   }

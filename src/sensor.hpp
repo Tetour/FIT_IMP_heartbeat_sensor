@@ -19,7 +19,7 @@ private:
     bool beatDetected;
     bool pulseDetected;
     
-    // BPM smoothing over 100 beats
+    // BPM smoothing over 10 beats
     std::vector<int> bpmHistory;
     
     // Signal smoothing for console output over 3 values

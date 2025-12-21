@@ -1,6 +1,6 @@
 PIO = /home/adam/.platformio/penv/bin/platformio
 
-all: flash monitor
+all: flash autosave
 
 flash: build upload
 
@@ -10,7 +10,7 @@ build:
 upload:
 	$(PIO) run -t upload
 
-monitor: autosave
+monitor:
 	$(PIO) device monitor -b 115200
 
 autosave:
