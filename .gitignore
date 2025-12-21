@@ -7,3 +7,20 @@ data/**/*.png
 
 # Measurement data files
 data/measurements/
+
+# LaTeX temporary files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.idx
+*.ind
+*.ilg
+doc/documentation_latex/*.pdf

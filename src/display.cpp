@@ -69,7 +69,7 @@ void Display::showSignalGraph() {
   display.println(F("Heart Signal Graph"));
   
   // Draw the signal graph
-  int graphHeight = 40;
+  int graphHeight = 32;  // Reduced to leave space for signal value at bottom
   int graphY = 20;
   int graphWidth = 128;  // Full screen width
   
@@ -98,6 +98,14 @@ void Display::showSignalGraph() {
     // Draw a point
     display.drawPixel(x, y, SSD1306_WHITE);
   }
+  
+  // Display current signal value at bottom
+  int currentSignal = sensor.getSignal();
+  
+  display.setTextSize(1);
+  display.setCursor(0, 56);
+  display.print(F("Signal: "));
+  display.print(currentSignal);
   
   // Flashing recording indicator in top right corner
   drawRecordingIndicator();

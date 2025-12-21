@@ -93,5 +93,15 @@ void loop() {
     lastDisplayUpdate = millis();
   }
 
-  delay(50);
+  // Record data every 50ms (20Hz) to avoid disrupting sensor timing
+  static unsigned long lastRecordTime = 0;
+  if (dataLogger.isRecording() && millis() - lastRecordTime > 50) {
+    dataLogger.logData(millis(), sensor.getSignal(), sensor.getPeakValue(), 
+                      sensor.getTroughValue(), sensor.getEffectiveThreshold(), 
+                      sensor.isBeatDetected(), sensor.getBPM());
+    dataLogger.checkAutoStop();
+    lastRecordTime = millis();
+  }
+
+  delay(20);
 }

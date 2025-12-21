@@ -131,12 +131,6 @@ void DataLogger::logData(unsigned long timestamp, int signal, int peak, int trou
   recordingFile.print(beatDetected ? "1" : "0");
   recordingFile.print(",");
   recordingFile.println(bpm);
-
-  // Periodic flush for data integrity (every 100 writes)
-  static int writeCount = 0;
-  if (++writeCount % 100 == 0) {
-    recordingFile.flush();
-  }
 }
 
 // Autorecording configuration

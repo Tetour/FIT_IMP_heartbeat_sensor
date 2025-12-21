@@ -1,0 +1,112 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[czech]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% Page geometry
+\geometry{margin=1in}
+
+% Disable paragraph indentation
+\parindent=0pt
+
+% Code highlighting
+\lstset{
+    language=C++,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    breaklines=true,
+    captionpos=b
+}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage\ z \pageref{LastPage}}
+\fancyfoot[C]{\textit{Dokumentace - Kit snímače srdečního tepu}}
+
+% Title page info
+\title{Dokumentace - Kit snímače srdečního tepu}
+\author{Adam Vrška (xvrskaa00)}
+\date{\today}
+
+\begin{document}
+
+% Title page
+\maketitle
+\thispagestyle{empty}
+
+\section{Úvod}
+
+Tent projekt se zabývá implementací snímače srdečního tepu založeného na mikrokontroléru ESP32. Zařízení je schopno měřit srdeční tep v reálném čase pomocí pulzního senzoru, zobrazovat výsledky na OLED displeji a umožňuje uživatelskou interakci prostřednictvím joysticku. Data mohou být také zaznamenávána pro pozdější analýzu.
+
+
+\subsection{Hardwarové komponenty}
+
+\begin{itemize}
+    \item ESP32 WEMOS D1 R32 vývojová deska
+    \item Senzor srdečního tepu
+    \item OLED displej (SSD1306 128x64)
+    \item Joystick modul pro navigaci
+\end{itemize}
+
+\subsubsection{Hardwarové zapojení}
+
+Komponenty jsou zapojeny podle následujícího schématu:
+
+\vspace{1em}
+
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Komponenta} & \textbf{Funkce} & \textbf{Pin ESP32} \\
+\hline
+Pulzní senzor & Analogový signál & GPIO 34 \\
+\hline
+OLED displej & I2C SDA & GPIO 21 \\
+ & I2C SCL & GPIO 22 \\
+\hline
+Joystick & UP vstup & GPIO 18 \\
+ & DOWN vstup & GPIO 19 \\
+ & LEFT vstup & GPIO 23 \\
+ & RIGHT vstup & GPIO 5 \\
+ & PRESS vstup & GPIO 13 \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+Všechny komponenty jsou napájeny z 3.3V výstupu ESP32.
+
+\section{Softwarové řešení}
+
+Zdrojový kód je rozdělen do jednotlivých tříd na základě hardwarových komponent, tedy tříd Sensor, Display a Joystick. Navíc existuje třída DataLogger pro správu záznamu dat. Součástí projektu jsou také podpůrné Python skripty pro ukládání a následné grafické zobrazení dat.
+
+\subsection{Algoritmus detekce tepu}
+
+Detekce tepu používá algoritmus adaptivního prahování, tedy dynamické úpravy prahové hodnoty na základě aktuálních vrcholů a údolí signálu. Hodnota prahu se používá na určení náběžné hrany, kterou je detekován srdeční pulz. Práh je určený jako stření hodnota mezi vrcholem a údolím signálu. Aby vrcholky a údolí nekonvergovali k extrémním hodnotá signálu, je implementován mechanismu skterý je z jejich extrémních hodnot samovolně snižuje, resp. zvyšuje. Tento přístup by měl zajistit spolehlivou detekci i při různých podmínkách měření.
+
+\subsection{Uživatelské rozhraní}
+
+\subsubsection{Zobrazení BPM}
+
+V této sekci vidí uživatel pouze aktuální hodnotu srdečního tepu v BPM (údery za minutu). Kliknutím na střed joysticku se přepne na další obrazovku. Kliknutím do leva nebo doprava se spustí nebo zastaví záznam dat.
+
+\subsubsection{Možnosti konfigurace}
+
+\end{document}

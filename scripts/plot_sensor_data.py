@@ -202,8 +202,9 @@ def plot_bpm_on_axis(csv_file, ax):
         # Update title with beat count and average BPM values
         title = f'Heart Rate (BPM)\nBeats: {int(total_beats)}, Sensor Avg: {sensor_avg_bpm:.1f}'
         if len(beat_based_bpms) > 0:
-            # Calculate final average of smoothed beat-based BPM
-            beat_avg_bpm = valid_bpm_values.tail(min(10, len(valid_bpm_values))).mean() if len(valid_bpm_values) > 0 else 0
+            # Calculate average of the last 10 beat-based BPM values
+            last_beat_bpms = beat_based_bpms[-min(10, len(beat_based_bpms)):]
+            beat_avg_bpm = np.mean(last_beat_bpms)
             title += f', Beat Avg: {beat_avg_bpm:.1f}'
         ax.set_title(title)
         

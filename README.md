@@ -62,68 +62,15 @@ make monitor
 ```
 
 ### 4. Measurements and Data Recording
+```bash
+make autosave
+```
 Use the joystick to navigate menus, configure parameters and start recording.
 
 ### 5. Generate Plots from Recorded Data
 ```bash
-make 
+make plot
 ```
-
-## Usage Guide
-
-### Menu Navigation
-- **Middle Button**: Toggle between BPM display and settings menu
-- **Up/Down**: Navigate menu items
-- **Left/Right**: Adjust values in settings menu
-
-### Recording Control
-- **Left/Right Buttons** (in BPM mode): Start/stop recording
-- Data is automatically saved to ESP32 SPIFFS and exported via serial
-
-### Serial Commands
-- `HELP`: Show available commands
-- `DUMP`: Manually dump recorded data to serial
-
-## Configuration
-
-### Sensor Parameters (in sensor.hpp)
-- `DEFAULT_THRESHOLD_OFFSET`: Base threshold adjustment
-- `DEFAULT_PEAK_DECAY_RATE`: Peak signal decay speed
-- `DEFAULT_TROUGH_DECAY_RATE`: Trough signal decay speed
-- `DEFAULT_BPM_OFFSET`: BPM calculation offset
-
-### Joystick Parameters (in joystick.hpp)
-- `DEBOUNCE_DELAY`: Button debounce time (50ms)
-- Debug output control via `setDebugOutput(bool)`
-
-## Data Format
-
-### CSV Structure
-```csv
-timestamp,signal,peak,trough,threshold,beat_detected,bpm
-1234567,2048,3000,1500,2250,1,72
-```
-
-### Data Collection
-- **Sample Rate**: 50Hz (every 20ms)
-- **Flush Frequency**: Every 100 data points for data integrity
-- **Auto-Export**: Triggered when recording stops
-
-## Build System
-
-### PlatformIO Targets
-- `make build`: Compile the firmware
-- `make upload`: Upload to ESP32
-- `make monitor`: Open serial monitor
-- `make flash`: Build and upload
-- `make clean`: Clean build files
-
-### Custom Targets
-- `make autosave`: Run automatic data saver
-- `make plot`: Generate data plots
-- `make venv`: Create Python virtual environment
-
-## Troubleshooting
 
 ### Debug Options
 

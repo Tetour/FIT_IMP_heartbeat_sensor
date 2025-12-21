@@ -16,10 +16,11 @@ private:
     int bpm;
     int peakValue;
     int troughValue;
+    int effectiveThreshold;
     bool beatDetected;
     bool pulseDetected;
     
-    // Store last 10 beat timestamps for BPM calculation
+    // Store last 11 beat timestamps for 10 interval BPM calculation
     std::vector<unsigned long> beatTimestamps;
     
     // Signal smoothing for console output over 3 values
@@ -59,6 +60,9 @@ public:
     bool isBeatDetected();        // Check if a heartbeat was just detected
     int  getSignal();             // Get raw sensor signal value
     int  getSmoothedSignal();     // Get smoothed signal value for console output
+    int  getPeakValue() const;    // Get current peak value
+    int  getTroughValue() const;  // Get current trough value
+    int  getEffectiveThreshold() const; // Get current effective threshold
     
     // Sensor configuration
     int  getBpmOffset() const;

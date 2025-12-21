@@ -10,6 +10,7 @@ Sensor::Sensor(DataLogger& logger) :
     bpm(0),
     peakValue(0),
     troughValue(4095),
+    effectiveThreshold(0),
     pulseDetected(false),
     peakDecayRate(DEFAULT_PEAK_DECAY_RATE),
     troughDecayRate(DEFAULT_TROUGH_DECAY_RATE),
@@ -48,30 +49,24 @@ void Sensor::init() {
   int autoThreshold = (peakValue + troughValue) / 2;
   
   // Apply manual offset to the auto threshold
-  int effectiveThreshold = autoThreshold + thresholdOffset;
+  effectiveThreshold = autoThreshold + thresholdOffset;
 
   // Detect rising edge (beat)
-  if (sensorSignal > effectiveThreshold && lastSignal <= effectiveThreshold && !pulseDetected) {
+  if (sensorSignal > effectiveThreshold && lastSignal <= effectiveThreshold) {
     unsigned long now = millis();
     unsigned long timeSinceLastBeat = now - lastBeatTime;
 
     // Valid beat if at least 300ms since last beat (max 200 BPM)
     if (timeSinceLastBeat > 300) {
       beatDetected = true;
-      pulseDetected = true;
       lastBeatTime = now;
 
-      // Store beat timestamp (keep only last 10)
+      // Store beat timestamp (keep only last 11 for 10 intervals)
       beatTimestamps.push_back(now);
-      if (beatTimestamps.size() > 10) {
+      if (beatTimestamps.size() > 11) {
         beatTimestamps.erase(beatTimestamps.begin());
       }
     }
-  }
-
-  // Reset pulse detection on falling edge
-  if (sensorSignal < effectiveThreshold) {
-    pulseDetected = false;
   }
 
   // Decay peaks and troughs slowly for auto-adjustment
@@ -84,7 +79,7 @@ void Sensor::init() {
   static unsigned long lastDebugTime = 0;
   if (debugOutput && Serial && millis() - lastDebugTime > 100) {
     Serial.print("Signal: ");
-    Serial.printf("%4d", getSmoothedSignal());
+    Serial.printf("%4d", getSignal());
     Serial.print(" Peak: ");
     Serial.printf("%4d", peakValue);
     Serial.print(" Trough: ");
@@ -102,14 +97,6 @@ void Sensor::init() {
     lastDebugTime = millis();
   }
 
-  // Save data to file if recording is enabled
-  if (dataLogger.isRecording()) {
-    dataLogger.logData(millis(), sensorSignal, peakValue, troughValue,
-                      effectiveThreshold, beatDetected, getBPM());
-    // Check for autorecording timeout
-    dataLogger.checkAutoStop();
-  }
-
   lastSignal = sensorSignal;
 }
 
@@ -124,26 +111,25 @@ int Sensor::getBPM() {
     return 0;
   }
   
-  // Calculate BPM from first and last beat in history
-  unsigned long firstBeat = beatTimestamps.front();
-  unsigned long lastBeat = beatTimestamps.back();
-  unsigned long timeSpan = lastBeat - firstBeat;
-  
-  // Calculate average interval
+  // Calculate BPM for each interval and average them
   int numIntervals = beatTimestamps.size() - 1;
-  unsigned long avgInterval = timeSpan / numIntervals;
+  int validBpmCount = 0;
+  int bpmSum = 0;
   
-  // Convert to BPM
-  if (avgInterval == 0) return 0;
-  int calculatedBPM = 60000 / avgInterval;
-  
-  // Clamp to reasonable range
-  if (calculatedBPM < 50 || calculatedBPM > 200) {
-    return 0;
+  for (int i = 0; i < numIntervals; i++) {
+    unsigned long interval = beatTimestamps[i + 1] - beatTimestamps[i];
+    if (interval > 0) {
+      int bpm = 60000 / interval;
+      bpmSum += bpm;
+      validBpmCount++;
+    }
   }
   
+  
+  int averageBPM = bpmSum / validBpmCount;
+  
   // Apply BPM offset
-  return max(0, calculatedBPM + bpmOffset);
+  return max(0, averageBPM + bpmOffset);
 }
 
 bool Sensor::isBeatDetected() {
@@ -165,6 +151,18 @@ int Sensor::getSmoothedSignal() {
   }
   
   return sum / signalHistory.size();
+}
+
+int Sensor::getPeakValue() const {
+  return peakValue;
+}
+
+int Sensor::getTroughValue() const {
+  return troughValue;
+}
+
+int Sensor::getEffectiveThreshold() const {
+  return effectiveThreshold;
 }
 
 // Peak decay rate configuration methods
