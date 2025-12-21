@@ -13,7 +13,7 @@ private:
     unsigned long recordingStartTime;  // Timestamp when recording started
 
     // Configuration defaults and limits
-    static const int DEFAULT_AUTO_RECORDING_TIME = 0;
+    static const int DEFAULT_AUTO_RECORDING_TIME = 30;
     static const int AUTO_RECORDING_MIN = 0;
     static const int AUTO_RECORDING_MAX = 300;
 
