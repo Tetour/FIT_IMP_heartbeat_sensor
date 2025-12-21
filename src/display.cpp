@@ -3,12 +3,15 @@
 Display::Display(Sensor& sensorRef) : 
     display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET),
     currentSelection(MenuOption::DATA_RECORDING),
-    sensor(sensorRef) {
+    sensor(sensorRef),
+    debugOutput(false) {
 }
 
 void Display::init() {
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println(F("SSD1306 allocation failed"));
+    if (debugOutput && Serial) {
+      Serial.println(F("SSD1306 allocation failed"));
+    }
     for (;;);
   }
   
@@ -172,4 +175,13 @@ void Display::handleRightMovement() {
 
 const char* Display::getPrefix(MenuOption option) const {
   return (currentSelection == option) ? "> " : "  ";
+}
+
+// Debug output control
+void Display::setDebugOutput(bool enable) {
+  debugOutput = enable;
+}
+
+bool Display::getDebugOutput() const {
+  return debugOutput;
 }

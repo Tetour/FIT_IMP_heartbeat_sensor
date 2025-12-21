@@ -23,6 +23,7 @@ private:
     MenuOption currentSelection;
     Adafruit_SSD1306 display;
     Sensor& sensor;
+    bool debugOutput;  // Debug output control
     
     static const int offsetStep = 5;
     static const int thresholdStep = 5;
@@ -42,4 +43,9 @@ public:
     void handleDownMovement();
     void handleLeftMovement();   // Decrease current setting value
     void handleRightMovement();  // Increase current setting value
+
+    // Debug output control
+    void setDebugOutput(bool enable);
+    bool getDebugOutput() const;
+
 };

@@ -8,6 +8,7 @@ private:
     bool recordingEnabled;
     String recordingFilename;
     File recordingFile;  // Keep file handle open during recording
+    bool debugOutput;    // Debug output control
 
 public:
     DataLogger();
@@ -22,4 +23,8 @@ public:
     // Data logging - called from sensor with data
     void logData(unsigned long timestamp, int signal, int peak, int trough,
                  int threshold, bool beatDetected, int bpm);
+
+    // Debug output control
+    void setDebugOutput(bool enable);
+    bool getDebugOutput() const;
 };

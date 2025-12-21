@@ -10,7 +10,7 @@ build:
 upload:
 	$(PIO) run -t upload
 
-monitor:
+monitor: autosave
 	$(PIO) device monitor -b 115200
 
 clean:
@@ -25,4 +25,7 @@ plot:
 	./scripts/plot_sensor_data.py data/measurements
 	./scripts/plot_sensor_data.py data/examples
 
-.PHONY: all build upload flash monitor clean venv plot
+autosave:
+	python3 scripts/auto_save_listener.py
+
+.PHONY: all build upload flash monitor clean venv plot autosave

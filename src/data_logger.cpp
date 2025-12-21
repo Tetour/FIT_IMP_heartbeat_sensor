@@ -2,17 +2,18 @@
 #include <SPIFFS.h>
 
 DataLogger::DataLogger() :
-    recordingEnabled(false) {
+    recordingEnabled(false),
+    debugOutput(false) {
 }
 
 void DataLogger::init() {
   // Initialize SPIFFS
   if (!SPIFFS.begin(true)) {
-    if (Serial) {
+    if (debugOutput && Serial) {
       Serial.println("SPIFFS initialization failed!");
     }
   } else {
-    if (Serial) {
+    if (debugOutput && Serial) {
       Serial.println("SPIFFS initialized successfully");
     }
   }
@@ -24,7 +25,7 @@ void DataLogger::startRecording(const char* filename) {
   // Delete existing file and create new one with CSV header
   if (SPIFFS.exists(filename)) {
     SPIFFS.remove(filename);
-    if (Serial) {
+    if (debugOutput && Serial) {
       Serial.println("Cleared existing data file");
     }
   }
@@ -35,13 +36,13 @@ void DataLogger::startRecording(const char* filename) {
     recordingFile.println("timestamp,signal,peak,trough,threshold,beat_detected,bpm");
     recordingEnabled = true;
 
-    if (Serial) {
+    if (debugOutput && Serial) {
       Serial.print("Started recording data to: ");
       Serial.println(filename);
       Serial.println("NOTE: Data is saved to ESP32 SPIFFS filesystem");
     }
   } else {
-    if (Serial) {
+    if (debugOutput && Serial) {
       Serial.print("Failed to create recording file: ");
       Serial.println(filename);
     }
@@ -56,7 +57,7 @@ void DataLogger::stopRecording() {
     recordingFile.close();
   }
 
-  if (Serial) {
+  if (debugOutput && Serial) {
     Serial.println("Stopped recording data");
     Serial.println("Auto-dumping data...");
   }
@@ -71,7 +72,7 @@ bool DataLogger::isRecording() const {
 
 void DataLogger::dumpRecordedData() {
   if (!recordingFilename.length()) {
-    if (Serial) {
+    if (debugOutput && Serial) {
       Serial.println("ERROR: No recording filename set");
     }
     return;
@@ -79,19 +80,21 @@ void DataLogger::dumpRecordedData() {
 
   File file = SPIFFS.open(recordingFilename.c_str(), FILE_READ);
   if (!file) {
-    if (Serial) {
+    if (debugOutput && Serial) {
       Serial.print("ERROR: Failed to open file for reading: ");
       Serial.println(recordingFilename);
     }
     return;
   }
 
+  // Always output data markers for auto-save script compatibility
   if (Serial) {
     Serial.println("===DATA_START===");
   }
 
   while (file.available()) {
     String line = file.readStringUntil('\n');
+    // Always output data lines for auto-save script compatibility
     if (Serial) {
       Serial.println(line);
     }
@@ -99,6 +102,7 @@ void DataLogger::dumpRecordedData() {
 
   file.close();
 
+  // Always output data end marker for auto-save script compatibility
   if (Serial) {
     Serial.println("===DATA_END===");
   }
@@ -130,4 +134,13 @@ void DataLogger::logData(unsigned long timestamp, int signal, int peak, int trou
   if (++writeCount % 100 == 0) {
     recordingFile.flush();
   }
+}
+
+// Debug output control
+void DataLogger::setDebugOutput(bool enable) {
+  debugOutput = enable;
+}
+
+bool DataLogger::getDebugOutput() const {
+  return debugOutput;
 }
