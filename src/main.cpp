@@ -9,7 +9,13 @@ Sensor sensor(dataLogger);
 Display display(sensor, dataLogger);
 Joystick joystick;
 
-bool showMenu = false;
+enum class ScreenState {
+    BPM_DISPLAY,
+    SIGNAL_DISPLAY,
+    SETTINGS_MENU
+};
+
+ScreenState currentScreen = ScreenState::BPM_DISPLAY;
 
 void setup() {
   Serial.begin(115200);
@@ -24,13 +30,23 @@ void loop() {
   joystick.update();
   sensor.update();
 
-  // Toggle settings on middle button press
+  // Toggle screens on middle button press
   if (joystick.wasMidPressed()) {
-    showMenu = !showMenu;
+    switch (currentScreen) {
+      case ScreenState::BPM_DISPLAY:
+        currentScreen = ScreenState::SIGNAL_DISPLAY;
+        break;
+      case ScreenState::SIGNAL_DISPLAY:
+        currentScreen = ScreenState::SETTINGS_MENU;
+        break;
+      case ScreenState::SETTINGS_MENU:
+        currentScreen = ScreenState::BPM_DISPLAY;
+        break;
+    }
   }
 
-  // Settings navigation
-  if (showMenu) {
+  // Settings navigation (only when in settings menu)
+  if (currentScreen == ScreenState::SETTINGS_MENU) {
     if (joystick.wasUpPressed()) {
       display.handleUpMovement();
     }
@@ -43,8 +59,8 @@ void loop() {
     if (joystick.wasRightPressed()) {
       display.handleRightMovement();
     }
-  } else {
-    // Direct recording toggle when in BPM display mode
+  } else if (currentScreen == ScreenState::BPM_DISPLAY || currentScreen == ScreenState::SIGNAL_DISPLAY) {
+    // Direct recording toggle when in BPM display or Signal display modes
     if (joystick.wasLeftPressed() || joystick.wasRightPressed()) {
       if (dataLogger.isRecording()) {
         dataLogger.stopRecording();
@@ -57,11 +73,19 @@ void loop() {
   // Update display every 100ms
   static unsigned long lastDisplayUpdate = 0;
   if (millis() - lastDisplayUpdate > 100) {
-    if (showMenu) {
-      display.showMenu();
-    } else {
-      int currentBPM = sensor.getBPM();
-      display.showBPM(currentBPM);
+    switch (currentScreen) {
+      case ScreenState::BPM_DISPLAY:
+        {
+          int currentBPM = sensor.getBPM();
+          display.showBPM(currentBPM);
+        }
+        break;
+      case ScreenState::SIGNAL_DISPLAY:
+        display.showHelloWorld();
+        break;
+      case ScreenState::SETTINGS_MENU:
+        display.showMenu();
+        break;
     }
     lastDisplayUpdate = millis();
   }

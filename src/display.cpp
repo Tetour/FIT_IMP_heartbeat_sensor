@@ -47,12 +47,30 @@ void Display::showBPM(int bpm) {
   display.println(F("BPM"));
   
   // Flashing recording indicator in top right corner
-  if (dataLogger.isRecording()) {
-    unsigned long currentMillis = millis();
-    if ((currentMillis / 500) % 2 == 0) {
-      display.fillCircle(120, 5, 2, SSD1306_WHITE);
-    }
-  }
+  drawRecordingIndicator();
+  
+  display.display();
+}
+
+void Display::showHelloWorld() {
+  display.clearDisplay();
+  
+  // Title
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println(F("Heart Signal Graph"));
+  
+  // Main content
+  display.setTextSize(2);
+  display.setCursor(20, 25);
+  display.println(F("Hello"));
+  
+  display.setTextSize(2);
+  display.setCursor(35, 45);
+  display.println(F("World"));
+  
+  // Flashing recording indicator in top right corner
+  drawRecordingIndicator();
   
   display.display();
 }
@@ -189,6 +207,16 @@ void Display::handleRightMovement() {
 
 const char* Display::getPrefix(MenuOption option) const {
   return (currentSelection == option) ? "> " : "  ";
+}
+
+// Helper method for recording indicator
+void Display::drawRecordingIndicator() {
+  if (dataLogger.isRecording()) {
+    unsigned long currentMillis = millis();
+    if ((currentMillis / 500) % 2 == 0) {
+      display.fillCircle(120, 5, 2, SSD1306_WHITE);
+    }
+  }
 }
 
 // Debug output control

@@ -34,11 +34,15 @@ private:
 
     // Helper method for menu display
     const char* getPrefix(MenuOption option) const;
+    
+    // Helper method for recording indicator
+    void drawRecordingIndicator();
 
 public:
     Display(Sensor& sensorRef, DataLogger& loggerRef);
     void init();
     void showBPM(int bpm);
+    void showHelloWorld();
 
     // Menu display and navigation methods
     void showMenu();

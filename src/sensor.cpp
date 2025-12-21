@@ -63,8 +63,8 @@ void Sensor::init() {
       // Calculate BPM
       int currentBPM = 60000 / timeSinceLastBeat;
 
-      // Clamp BPM to reasonable range
-      if (currentBPM < 40) currentBPM = 0;
+      // Clamp BPM to reasonable range (don't register below 50 BPM)
+      if (currentBPM < 50) currentBPM = 0;
       if (currentBPM > 200) currentBPM = 0;
 
       // Store BPM in history for smoothing (keep only last 10)
