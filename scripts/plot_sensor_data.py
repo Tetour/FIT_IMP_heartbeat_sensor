@@ -104,33 +104,36 @@ def plot_file_on_axis(csv_file, ax):
             threshold_col = 'threshold'
 
         # Plot the data
-        ax.plot(df[timestamp_col], df[signal_col], 'b-', linewidth=1, alpha=0.8)
-        ax.set_xlabel('Timestamp (ms)')
+        time_offset = df[timestamp_col].min()
+        ax.plot(df[timestamp_col] - time_offset, df[signal_col], 'b-', linewidth=1, alpha=0.8)
+        ax.set_xlabel('Time (ms from start)')
         ax.set_ylabel('Signal Value')
         ax.set_title(f'Heartbeat Sensor Signal - {os.path.basename(csv_file)}')
         ax.grid(True, alpha=0.3)
 
         # Plot threshold if available
         if threshold_col in df.columns:
-            ax.plot(df[timestamp_col], df[threshold_col], color='purple', linewidth=1.5,
+            ax.plot(df[timestamp_col] - time_offset, df[threshold_col], color='purple', linewidth=1.5,
                    label='Threshold', alpha=0.8)
 
-        # Add some statistics
-        min_signal = df[signal_col].min()
-        max_signal = df[signal_col].max()
-        mean_signal = df[signal_col].mean()
+        # Plot peak and trough if available
+        if 'peak' in df.columns:
+            ax.plot(df[timestamp_col] - time_offset, df['peak'], color='red', linewidth=1,
+                   label='Peak', alpha=0.8)
+        if 'trough' in df.columns:
+            ax.plot(df[timestamp_col] - time_offset, df['trough'], color='blue', linewidth=1,
+                   label='Trough', alpha=0.8)
 
-        ax.axhline(y=mean_signal, color='r', linestyle='--', alpha=0.7,
-                  label=f'Mean: {mean_signal:.1f}')
-        ax.axhline(y=max_signal, color='g', linestyle=':', alpha=0.7,
-                  label=f'Max: {max_signal}')
-        ax.axhline(y=min_signal, color='orange', linestyle=':', alpha=0.7,
-                  label=f'Min: {min_signal}')
+        # Plot beat detected markers
+        if 'beat_detected' in df.columns:
+            beats = df[df['beat_detected'] == 1]
+            if not beats.empty:
+                ax.scatter(beats[timestamp_col] - time_offset, beats[signal_col], color='green', s=10,
+                          label='Beats Detected', alpha=0.8)
 
         ax.legend()
 
         print(f"Plotted {len(df)} data points from {os.path.basename(csv_file)}")
-        print(f"Signal range: {min_signal:.1f} - {max_signal:.1f}, Mean: {mean_signal:.1f}")
     except Exception as e:
         print(f"Error processing {csv_file}: {e}")
 
