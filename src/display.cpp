@@ -45,6 +45,14 @@ void Display::showBPM(int bpm) {
   display.setCursor(100, 40);
   display.println(F("BPM"));
   
+  // Flashing recording indicator in top right corner
+  if (sensor.isRecording()) {
+    unsigned long currentMillis = millis();
+    if ((currentMillis / 500) % 2 == 0) {
+      display.fillCircle(120, 5, 2, SSD1306_WHITE);
+    }
+  }
+  
   display.display();
 }
 

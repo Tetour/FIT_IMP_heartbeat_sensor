@@ -13,11 +13,11 @@ import os
 from datetime import datetime
 import time
 
-def listen_and_save(port='/dev/ttyUSB1', baudrate=115200):
+def listen_and_save(port='/dev/ttyUSB0', baudrate=115200):
     """Listen to serial port and automatically save data when received."""
     
     # Create data directory if it doesn't exist
-    data_dir = './data'
+    data_dir = './data/measurements'
     os.makedirs(data_dir, exist_ok=True)
     
     try:
@@ -27,7 +27,7 @@ def listen_and_save(port='/dev/ttyUSB1', baudrate=115200):
         # Wait for connection to stabilize
         time.sleep(1)
         
-        print("✓ Connected! Listening for data...")
+        print("Connected! Listening for data...")
         print("Press Ctrl+C to stop\n")
         
         recording_data = False
@@ -53,20 +53,19 @@ def listen_and_save(port='/dev/ttyUSB1', baudrate=115200):
                         
                         if data_lines:
                             # Generate output filename with timestamp
-                            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                            output_file = os.path.join(data_dir, f'sensor_data_{timestamp}.csv')
+                            timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                            output_file = os.path.join(data_dir, f'measurement_{timestamp}.csv')
                             
                             # Write data to file
                             with open(output_file, 'w') as f:
                                 for data_line in data_lines:
                                     f.write(data_line + '\n')
                             
-                            print(f"✓ Data saved to: {output_file}")
+                            print(f"  Data saved to: {output_file}")
                             print(f"  Lines: {len(data_lines)}")
-                            print(f"  First line: {data_lines[0] if data_lines else 'N/A'}")
                             print()
                         else:
-                            print("⚠ No data received")
+                            print("  No data received")
                         
                         data_lines = []
                         continue
@@ -101,7 +100,7 @@ def listen_and_save(port='/dev/ttyUSB1', baudrate=115200):
         return False
 
 if __name__ == '__main__':
-    port = sys.argv[1] if len(sys.argv) > 1 else '/dev/ttyUSB1'
+    port = sys.argv[1] if len(sys.argv) > 1 else '/dev/ttyUSB0'
     
     print("=" * 60)
     print("ESP32 Heartbeat Sensor - Automatic Data Saver")
