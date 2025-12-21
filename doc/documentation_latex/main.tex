@@ -39,7 +39,6 @@
 \fancyhf{}
 \fancyhead[L]{\leftmark}
 \fancyhead[R]{\thepage\ z \pageref{LastPage}}
-\fancyfoot[C]{\textit{Dokumentace - Kit snímače srdečního tepu}}
 
 % Title page info
 \title{Dokumentace - Kit snímače srdečního tepu}
@@ -54,7 +53,7 @@
 
 \section{Úvod}
 
-Tent projekt se zabývá implementací snímače srdečního tepu založeného na mikrokontroléru ESP32. Zařízení je schopno měřit srdeční tep v reálném čase pomocí pulzního senzoru, zobrazovat výsledky na OLED displeji a umožňuje uživatelskou interakci prostřednictvím joysticku. Data mohou být také zaznamenávána pro pozdější analýzu.
+Tent projekt se zabývá implementací snímače srdečního tepu založeného na mikrokontroléru ESP32. Zařízení je schopno měřit srdeční tep v reálném čase pomocí pulzního senzoru, zobrazovat výsledky na OLED displeji a umožňuje uživatelskou interakci prostřednictvím joysticku. Data mohou být také zaznamenávána pro pozdější analýzu. 
 
 
 \subsection{Hardwarové komponenty}
@@ -107,6 +106,62 @@ Detekce tepu používá algoritmus adaptivního prahování, tedy dynamické úp
 
 V této sekci vidí uživatel pouze aktuální hodnotu srdečního tepu v BPM (údery za minutu). Kliknutím na střed joysticku se přepne na další obrazovku. Kliknutím do leva nebo doprava se spustí nebo zastaví záznam dat.
 
-\subsubsection{Možnosti konfigurace}
+\subsubsection{Zobrazení grafu}
+
+Tato obrazovka zobrazuje grafický průběh signálu ze senzoru srdečního tepu. Je zde také k dispozici aktuální hodnota siználu z tohoto senzoru. Stisknutím středu joysticku se přepne na obrazovku nastavení. Kliknutím do leva nebo doprava se spustí nebo zastaví záznam dat.
+
+\subsubsection{Nastavení}
+
+V sekci nastavení má uživatel přístup k různým konfiguračním možnostem:
+
+\begin{itemize}
+    \item \textbf{Recording}: Možnost zapnout nebo vypnout nahrávání dat.
+    \item \textbf{Auto record}: Možnost zapnout automatické ukončení nahrávání po určitém čase a nastavení této doby.
+    \item \textbf{Thrs offset}: Nastavení offsetu prahové hodnoty pro detekci tepu.
+    \item \textbf{Decay rate}: Nastavení rycholosti snižování vrcholků a zvyšování údolí signálu v algoritmu adaptivního prahování.
+\end{itemize}
+
+Navigace v nastavení probíhá pomocí joysticku - nahoru/dolů pro výběr položky, doleva/doprava pro změnu hodnoty, střed pro potvrzení pro přechod na obrazovku zobrazení BPM.
+
+\subsection{Práce s aplikací}
+
+Aplikace obsahuje Makefile pro snadné sestavení a práci s aplikací. Jednotlívé cíle významné pro uživatele jsou popsány v souboru README.md.
+
+\section{Analýza dat}
+
+\subsection{Záznam dat bez měření tepu}
+
+Následující graf zobrazuje záznam dat bez přítomnosti srdečního tepu (šum/ruch):
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../../data/examples/noise_1.png}
+    \caption{Záznam šumu - signál bez detekce tepu}
+    \label{fig:noise}
+\end{figure}
+
+\subsection{Záznam dat s měřením tepu}
+
+Následující graf zobrazuje záznam dat s přítomným srdečním tepem:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../../data/examples/hearthbeat_1.png}
+    \caption{Záznam srdečního tepu - signál s detekcí tepu}
+    \label{fig:heartbeat}
+\end{figure}
+
+\section{Závěr}
+
+Data získaná v rámci projektu nedosahují konzistentní kvality, což může být způsobeno následujícími faktory:
+\begin{itemize}
+    \item Nesprávné umístění senzoru na prstu.
+    \item Osvětlení okolí, které může ovlivnit optický senzor.
+    \item Ovlivnění měření nahráváním dat v reálném čase.
+    \item Nesprávným výstupem senzoru.
+    \item Problémy s časováním měření a nedostatečnou odolností algoritmu výpočtu BPM na rušení.
+\end{itemize}
+
+Z těchto možností se zdají nejvíce pravděpodobná poslední 2 možnosti, tedy nesprávný výstup senzoru, problémy algoritmu proti rušení a časování měření.
 
 \end{document}
