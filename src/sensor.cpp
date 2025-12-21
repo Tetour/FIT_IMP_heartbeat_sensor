@@ -101,11 +101,6 @@ void Sensor::init() {
 }
 
 int Sensor::getBPM() {
-  // Return 0 if no beat detected in last 3 seconds
-  if (millis() - lastBeatTime > 3000) {
-    return 0;
-  }
-  
   // Need at least 2 beats to calculate BPM
   if (beatTimestamps.size() < 2) {
     return 0;
@@ -124,7 +119,6 @@ int Sensor::getBPM() {
       validBpmCount++;
     }
   }
-  
   
   int averageBPM = bpmSum / validBpmCount;
   

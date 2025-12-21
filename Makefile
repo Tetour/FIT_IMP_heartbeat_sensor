@@ -41,7 +41,7 @@ $(PDF_OUTPUT): $(LATEX_MAIN)
 latex-clean:
 	rm -f $(LATEX_DIR)/*.aux $(LATEX_DIR)/*.log $(LATEX_DIR)/*.out $(LATEX_DIR)/*.toc $(LATEX_DIR)/*.lof $(LATEX_DIR)/*.lot $(LATEX_DIR)/main.pdf
 
-zip: xvrskaa00.zip
+zip: latex xvrskaa00.zip
 
 xvrskaa00.zip:
 	zip -r xvrskaa00.zip . \
@@ -49,6 +49,7 @@ xvrskaa00.zip:
 		--exclude=".vscode/*" \
 		--exclude="venv/*" \
 		--exclude=".git/*" \
+		--exclude=".gitignore" \
 		--exclude="data/**/*.png" \
 		--exclude="data/measurements/*" \
 		--exclude="*.aux" \
@@ -65,7 +66,6 @@ xvrskaa00.zip:
 		--exclude="*.idx" \
 		--exclude="*.ind" \
 		--exclude="*.ilg" \
-		--exclude="doc/documentation_latex/*.pdf" \
 		--exclude="xvrskaa00.zip"
 
 clean: plot-clean latex-clean
