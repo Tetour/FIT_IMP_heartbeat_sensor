@@ -27,6 +27,11 @@ private:
     DataLogger& dataLogger;
     bool debugOutput;  // Debug output control
     
+    // Signal graph data
+    static const int SIGNAL_HISTORY_SIZE = 128;  // Number of signal points to display
+    int signalHistory[SIGNAL_HISTORY_SIZE];
+    int signalHistoryIndex;
+    
     static const int offsetStep = 5;
     static const int thresholdStep = 5;
     static const int decayStep = 1;
@@ -41,8 +46,9 @@ private:
 public:
     Display(Sensor& sensorRef, DataLogger& loggerRef);
     void init();
+    void updateSignalHistory(int signalValue);
     void showBPM(int bpm);
-    void showHelloWorld();
+    void showSignalGraph();
 
     // Menu display and navigation methods
     void showMenu();

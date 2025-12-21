@@ -159,16 +159,14 @@ def plot_bpm_on_axis(csv_file, ax):
         # Count total beats detected
         total_beats = df[beat_detected_col].sum()
 
-        # Calculate sliding average BPM (last 5 non-zero values from data)
+        # Calculate average of sensor BPM values (no sliding average, just mean of all values)
         valid_bpm_values = df[df[bpm_col] > 0][bpm_col]
-        if len(valid_bpm_values) >= 5:
-            sliding_avg_bpm = valid_bpm_values.tail(5).mean()
-        elif len(valid_bpm_values) > 0:
-            sliding_avg_bpm = valid_bpm_values.mean()
+        if len(valid_bpm_values) > 0:
+            sensor_avg_bpm = valid_bpm_values.mean()
         else:
-            sliding_avg_bpm = 0
+            sensor_avg_bpm = 0
 
-        # Calculate BPM from beat detections with sliding average
+        # Calculate BPM from beat detections with sliding average of up to 10 values
         beat_timestamps = df[df[beat_detected_col] == 1][timestamp_col].values
         beat_based_bpms = []
         
@@ -178,15 +176,11 @@ def plot_bpm_on_axis(csv_file, ax):
             intervals_sec = intervals_ms / 1000.0    # Convert to seconds
             bpm_values = 60.0 / intervals_sec         # BPM = 60 / interval in seconds
             
-            # Apply sliding average of last 5 BPM values
-            if len(bpm_values) >= 5:
-                for i in range(len(bpm_values)):
-                    start_idx = max(0, i - 4)  # Include up to 5 previous values
-                    avg_bpm = np.mean(bpm_values[start_idx:i+1])
-                    beat_based_bpms.append(avg_bpm)
-            else:
-                # If less than 5 beats, use all available
-                beat_based_bpms = bpm_values.tolist()
+            # Apply sliding average of up to 10 BPM values (never more)
+            for i in range(len(bpm_values)):
+                start_idx = max(0, i - 9)  # Include up to 10 previous values
+                avg_bpm = np.mean(bpm_values[start_idx:i+1])
+                beat_based_bpms.append(avg_bpm)
             
             # Create time array for beat-based BPMs (use beat timestamps)
             beat_times = beat_timestamps[1:len(beat_based_bpms)+1]  # Skip first beat, align with BPMs
@@ -200,15 +194,17 @@ def plot_bpm_on_axis(csv_file, ax):
         
         # Plot BPM calculated from beats
         if len(beat_times) > 0 and len(beat_based_bpms) > 0:
-            ax.plot(beat_times - time_offset, beat_based_bpms, 'b--', linewidth=2, alpha=0.8, label='Beat-based BPM')
+            ax.plot(beat_times - time_offset, beat_based_bpms, 'b--', linewidth=2, alpha=0.8, label='Beat-based BPM (smoothed)')
         
         ax.set_xlabel('Time (ms from start)')
         ax.set_ylabel('BPM')
         
-        # Update title with beat count and sliding average BPM
-        title = f'Heart Rate (BPM)\nBeats: {int(total_beats)}, Sensor Avg: {sliding_avg_bpm:.1f}'
+        # Update title with beat count and average BPM values
+        title = f'Heart Rate (BPM)\nBeats: {int(total_beats)}, Sensor Avg: {sensor_avg_bpm:.1f}'
         if len(beat_based_bpms) > 0:
-            title += f', Beat Avg: {np.mean(beat_based_bpms):.1f}'
+            # Calculate final average of smoothed beat-based BPM
+            beat_avg_bpm = valid_bpm_values.tail(min(10, len(valid_bpm_values))).mean() if len(valid_bpm_values) > 0 else 0
+            title += f', Beat Avg: {beat_avg_bpm:.1f}'
         ax.set_title(title)
         
         ax.grid(True, alpha=0.3)

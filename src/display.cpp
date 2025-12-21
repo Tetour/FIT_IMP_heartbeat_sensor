@@ -5,7 +5,10 @@ Display::Display(Sensor& sensorRef, DataLogger& loggerRef) :
     currentSelection(MenuOption::DATA_RECORDING),
     sensor(sensorRef),
     dataLogger(loggerRef),
-    debugOutput(false) {
+    debugOutput(false),
+    signalHistoryIndex(0) {
+  // Initialize signal history with zeros
+  memset(signalHistory, 0, sizeof(signalHistory));
 }
 
 void Display::init() {
@@ -20,6 +23,11 @@ void Display::init() {
   display.setTextColor(SSD1306_WHITE);
   display.clearDisplay();
   display.display();
+}
+
+void Display::updateSignalHistory(int signalValue) {
+  signalHistory[signalHistoryIndex] = signalValue;
+  signalHistoryIndex = (signalHistoryIndex + 1) % SIGNAL_HISTORY_SIZE;
 }
 
 void Display::showBPM(int bpm) {
@@ -52,7 +60,7 @@ void Display::showBPM(int bpm) {
   display.display();
 }
 
-void Display::showHelloWorld() {
+void Display::showSignalGraph() {
   display.clearDisplay();
   
   // Title
@@ -60,14 +68,36 @@ void Display::showHelloWorld() {
   display.setCursor(0, 0);
   display.println(F("Heart Signal Graph"));
   
-  // Main content
-  display.setTextSize(2);
-  display.setCursor(20, 25);
-  display.println(F("Hello"));
+  // Draw the signal graph
+  int graphHeight = 40;
+  int graphY = 20;
+  int graphWidth = 128;  // Full screen width
   
-  display.setTextSize(2);
-  display.setCursor(35, 45);
-  display.println(F("World"));
+  // Find min and max values in the signal history for scaling
+  int minVal = 1023;
+  int maxVal = 0;
+  for (int i = 0; i < SIGNAL_HISTORY_SIZE; i++) {
+    if (signalHistory[i] < minVal) minVal = signalHistory[i];
+    if (signalHistory[i] > maxVal) maxVal = signalHistory[i];
+  }
+  
+  // Avoid division by zero
+  if (maxVal == minVal) {
+    maxVal = minVal + 1;
+  }
+  
+  // Draw the graph
+  for (int x = 0; x < graphWidth; x++) {
+    // Calculate history index: x=0 is oldest, x=127 is newest
+    int historyIndex = (signalHistoryIndex - graphWidth + x + SIGNAL_HISTORY_SIZE) % SIGNAL_HISTORY_SIZE;
+    int signalValue = signalHistory[historyIndex];
+    
+    // Scale the signal value to fit in the graph height
+    int y = graphY + graphHeight - ((signalValue - minVal) * graphHeight / (maxVal - minVal));
+    
+    // Draw a point
+    display.drawPixel(x, y, SSD1306_WHITE);
+  }
   
   // Flashing recording indicator in top right corner
   drawRecordingIndicator();

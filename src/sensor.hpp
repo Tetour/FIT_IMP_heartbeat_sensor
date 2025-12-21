@@ -19,8 +19,8 @@ private:
     bool beatDetected;
     bool pulseDetected;
     
-    // BPM smoothing over 10 beats
-    std::vector<int> bpmHistory;
+    // Store last 10 beat timestamps for BPM calculation
+    std::vector<unsigned long> beatTimestamps;
     
     // Signal smoothing for console output over 3 values
     std::vector<int> signalHistory;

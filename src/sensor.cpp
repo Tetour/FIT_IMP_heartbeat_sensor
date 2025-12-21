@@ -59,21 +59,13 @@ void Sensor::init() {
     if (timeSinceLastBeat > 300) {
       beatDetected = true;
       pulseDetected = true;
-
-      // Calculate BPM
-      int currentBPM = 60000 / timeSinceLastBeat;
-
-      // Clamp BPM to reasonable range (don't register below 50 BPM)
-      if (currentBPM < 50) currentBPM = 0;
-      if (currentBPM > 200) currentBPM = 0;
-
-      // Store BPM in history for smoothing (keep only last 10)
-      bpmHistory.push_back(currentBPM);
-      if (bpmHistory.size() > 10) {
-        bpmHistory.erase(bpmHistory.begin());
-      }
-
       lastBeatTime = now;
+
+      // Store beat timestamp (keep only last 10)
+      beatTimestamps.push_back(now);
+      if (beatTimestamps.size() > 10) {
+        beatTimestamps.erase(beatTimestamps.begin());
+      }
     }
   }
 
@@ -127,24 +119,31 @@ int Sensor::getBPM() {
     return 0;
   }
   
-  // Calculate average BPM over available history
-  if (bpmHistory.empty()) {
+  // Need at least 2 beats to calculate BPM
+  if (beatTimestamps.size() < 2) {
     return 0;
   }
   
-  int sum = 0;
-  int validCount = 0;
-  for (int bpmValue : bpmHistory) {
-    if (bpmValue > 0) {  // Only count valid BPM readings
-      sum += bpmValue;
-      validCount++;
-    }
+  // Calculate BPM from first and last beat in history
+  unsigned long firstBeat = beatTimestamps.front();
+  unsigned long lastBeat = beatTimestamps.back();
+  unsigned long timeSpan = lastBeat - firstBeat;
+  
+  // Calculate average interval
+  int numIntervals = beatTimestamps.size() - 1;
+  unsigned long avgInterval = timeSpan / numIntervals;
+  
+  // Convert to BPM
+  if (avgInterval == 0) return 0;
+  int calculatedBPM = 60000 / avgInterval;
+  
+  // Clamp to reasonable range
+  if (calculatedBPM < 50 || calculatedBPM > 200) {
+    return 0;
   }
   
-  int averageBPM = validCount > 0 ? sum / validCount : 0;
-  
   // Apply BPM offset
-  return max(0, averageBPM + bpmOffset);
+  return max(0, calculatedBPM + bpmOffset);
 }
 
 bool Sensor::isBeatDetected() {

@@ -29,6 +29,9 @@ void setup() {
 void loop() {
   joystick.update();
   sensor.update();
+  
+  // Update signal history for graph display
+  display.updateSignalHistory(sensor.getSignal());
 
   // Toggle screens on middle button press
   if (joystick.wasMidPressed()) {
@@ -81,7 +84,7 @@ void loop() {
         }
         break;
       case ScreenState::SIGNAL_DISPLAY:
-        display.showHelloWorld();
+        display.showSignalGraph();
         break;
       case ScreenState::SETTINGS_MENU:
         display.showMenu();
@@ -90,5 +93,5 @@ void loop() {
     lastDisplayUpdate = millis();
   }
 
-  delay(20);
+  delay(50);
 }
