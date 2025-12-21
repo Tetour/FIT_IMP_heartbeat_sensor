@@ -25,8 +25,8 @@ private:
     // Signal smoothing for console output over 3 values
     std::vector<int> signalHistory;
     
-    // Data logger instance
-    DataLogger dataLogger;
+    // Data logger reference
+    DataLogger& dataLogger;
     
     // Configuration parameters
     int peakDecayRate;
@@ -52,19 +52,13 @@ private:
     static const int TROUGH_DECAY_MAX = 100;
 
 public:
-    Sensor();
+    Sensor(DataLogger& logger);
     void init();
     void update();
     int  getBPM();                // Get current BPM
     bool isBeatDetected();        // Check if a heartbeat was just detected
     int  getSignal();             // Get raw sensor signal value
     int  getSmoothedSignal();     // Get smoothed signal value for console output
-    
-    // Data recording control
-    void startRecording(const char* filename = "/sensor_data.csv") { dataLogger.startRecording(filename); }
-    void stopRecording() { dataLogger.stopRecording(); }
-    bool isRecording() const { return dataLogger.isRecording(); }
-    void dumpRecordedData() { dataLogger.dumpRecordedData(); }
     
     // Sensor configuration
     int  getBpmOffset() const;
@@ -79,13 +73,6 @@ public:
     int  getTroughDecayRate() const;
     void setTroughDecayRate(int rate);
 
-    // Convenience method for UI - gets decay rate (assumes peak and trough are the same)
-    int  getDecayRate() const { return getPeakDecayRate(); }
-    void setDecayRate(int rate) { setPeakDecayRate(rate); setTroughDecayRate(rate); }
-
-    bool getDebugOutput() const;
-    void setDebugOutput(bool enable);
-
     // Configuration limits
     static int getBpmOffsetMin() { return BPM_OFFSET_MIN; }
     static int getBpmOffsetMax() { return BPM_OFFSET_MAX; }
@@ -99,4 +86,10 @@ public:
     static int getTroughDecayMin() { return TROUGH_DECAY_MIN; }
     static int getTroughDecayMax() { return TROUGH_DECAY_MAX; }
 
+    int  getDecayRate() const { return getPeakDecayRate(); }
+    void setDecayRate(int rate) { setPeakDecayRate(rate); setTroughDecayRate(rate); }
+
+    // Debug output control
+    bool getDebugOutput() const;
+    void setDebugOutput(bool enable);
 };

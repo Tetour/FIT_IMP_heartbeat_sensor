@@ -1,7 +1,7 @@
 #include "sensor.hpp"
 #include <SPIFFS.h>
 
-Sensor::Sensor() :
+Sensor::Sensor(DataLogger& logger) :
     sensorSignal(0),
     lastSignal(0),
     thresholdOffset(DEFAULT_THRESHOLD_OFFSET),  // Default threshold value
@@ -13,15 +13,13 @@ Sensor::Sensor() :
     pulseDetected(false),
     peakDecayRate(DEFAULT_PEAK_DECAY_RATE),
     troughDecayRate(DEFAULT_TROUGH_DECAY_RATE),
-    bpmOffset(DEFAULT_BPM_OFFSET),  // Default BPM offset value
-    debugOutput(false) {  // Default debug output disabled
+    bpmOffset(DEFAULT_BPM_OFFSET),
+    debugOutput(false),
+    dataLogger(logger) {
 }
 
 void Sensor::init() {
   pinMode(PULSE_INPUT, INPUT);
-
-  // Initialize data logger (which initializes SPIFFS)
-  dataLogger.init();
 
   if (Serial) {
     Serial.println("Pulse sensor initialized on GPIO 34");
@@ -116,6 +114,8 @@ void Sensor::init() {
   if (dataLogger.isRecording()) {
     dataLogger.logData(millis(), sensorSignal, peakValue, troughValue,
                       effectiveThreshold, beatDetected, getBPM());
+    // Check for autorecording timeout
+    dataLogger.checkAutoStop();
   }
 
   lastSignal = sensorSignal;

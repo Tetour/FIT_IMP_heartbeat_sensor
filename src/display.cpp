@@ -1,9 +1,10 @@
 #include "display.hpp"
 
-Display::Display(Sensor& sensorRef) : 
+Display::Display(Sensor& sensorRef, DataLogger& loggerRef) : 
     display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET),
     currentSelection(MenuOption::DATA_RECORDING),
     sensor(sensorRef),
+    dataLogger(loggerRef),
     debugOutput(false) {
 }
 
@@ -46,7 +47,7 @@ void Display::showBPM(int bpm) {
   display.println(F("BPM"));
   
   // Flashing recording indicator in top right corner
-  if (sensor.isRecording()) {
+  if (dataLogger.isRecording()) {
     unsigned long currentMillis = millis();
     if ((currentMillis / 500) % 2 == 0) {
       display.fillCircle(120, 5, 2, SSD1306_WHITE);
@@ -82,13 +83,18 @@ void Display::showMenu() {
   display.setCursor(0, 20);
   display.printf("%sRecording:", getPrefix(MenuOption::DATA_RECORDING));
   display.setCursor(100, 20);
-  display.printf("%4s", sensor.isRecording() ? "ON" : "OFF");
+  display.printf("%4s", dataLogger.isRecording() ? "ON" : "OFF");
   
-  // Offset option
+  // Autorecording option
   display.setCursor(0, 32);
-  display.printf("%sBPM offset:", getPrefix(MenuOption::BPM_OFFSET));
+  display.printf("%sAuto record:", getPrefix(MenuOption::AUTORECORDING));
   display.setCursor(100, 32);
-  display.printf("%4d", sensor.getBpmOffset());
+  int recTime = dataLogger.getAutoRecordingTime();
+  if (recTime == 0) {
+    display.printf("%4s", "NO");
+  } else {
+    display.printf("%3ds", recTime);
+  }
   
   // Threshold option
   display.setCursor(0, 44);
@@ -123,16 +129,16 @@ void Display::handleLeftMovement() {
   switch (currentSelection) {
     case MenuOption::DATA_RECORDING: {
       // Toggle recording on/off
-      if (sensor.isRecording()) {
-        sensor.stopRecording();
+      if (dataLogger.isRecording()) {
+        dataLogger.stopRecording();
       } else {
-        sensor.startRecording("/sensor_data.csv");
+        dataLogger.startRecording("/sensor_data.csv");
       }
       break;
     }
-    case MenuOption::BPM_OFFSET: {
-      int currentValue = sensor.getBpmOffset();
-      sensor.setBpmOffset(max(Sensor::getBpmOffsetMin(), currentValue - offsetStep));
+    case MenuOption::AUTORECORDING: {
+      int currentValue = dataLogger.getAutoRecordingTime();
+      dataLogger.setAutoRecordingTime(max(DataLogger::getAutoRecordingMin(), currentValue - recordingStep));
       break;
     }
     case MenuOption::BEAT_THRESHOLD: {
@@ -154,16 +160,16 @@ void Display::handleRightMovement() {
   switch (currentSelection) {
     case MenuOption::DATA_RECORDING: {
       // Toggle recording on/off
-      if (sensor.isRecording()) {
-        sensor.stopRecording();
+      if (dataLogger.isRecording()) {
+        dataLogger.stopRecording();
       } else {
-        sensor.startRecording("/sensor_data.csv");
+        dataLogger.startRecording("/sensor_data.csv");
       }
       break;
     }
-    case MenuOption::BPM_OFFSET: {
-      int currentValue = sensor.getBpmOffset();
-      sensor.setBpmOffset(min(Sensor::getBpmOffsetMax(), currentValue + offsetStep));
+    case MenuOption::AUTORECORDING: {
+      int currentValue = dataLogger.getAutoRecordingTime();
+      dataLogger.setAutoRecordingTime(min(DataLogger::getAutoRecordingMax(), currentValue + recordingStep));
       break;
     }
     case MenuOption::BEAT_THRESHOLD: {

@@ -4,12 +4,13 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "sensor.hpp"
+#include "data_logger.hpp"
 
 class Display {
 private:
     enum class MenuOption : int {
         DATA_RECORDING = 0,
-        BPM_OFFSET,
+        AUTORECORDING,
         BEAT_THRESHOLD,
         DECAY_RATE,
         NUM_OF_OPTIONS
@@ -23,17 +24,19 @@ private:
     MenuOption currentSelection;
     Adafruit_SSD1306 display;
     Sensor& sensor;
+    DataLogger& dataLogger;
     bool debugOutput;  // Debug output control
     
     static const int offsetStep = 5;
     static const int thresholdStep = 5;
     static const int decayStep = 1;
+    static const int recordingStep = 5;
 
     // Helper method for menu display
     const char* getPrefix(MenuOption option) const;
 
 public:
-    Display(Sensor& sensorRef);
+    Display(Sensor& sensorRef, DataLogger& loggerRef);
     void init();
     void showBPM(int bpm);
 

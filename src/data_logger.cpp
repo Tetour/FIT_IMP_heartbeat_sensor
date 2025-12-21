@@ -3,6 +3,8 @@
 
 DataLogger::DataLogger() :
     recordingEnabled(false),
+    autoRecordingTime(DEFAULT_AUTO_RECORDING_TIME),
+    recordingStartTime(0),
     debugOutput(false) {
 }
 
@@ -35,6 +37,7 @@ void DataLogger::startRecording(const char* filename) {
   if (recordingFile) {
     recordingFile.println("timestamp,signal,peak,trough,threshold,beat_detected,bpm");
     recordingEnabled = true;
+    recordingStartTime = millis();
 
     if (debugOutput && Serial) {
       Serial.print("Started recording data to: ");
@@ -133,6 +136,28 @@ void DataLogger::logData(unsigned long timestamp, int signal, int peak, int trou
   static int writeCount = 0;
   if (++writeCount % 100 == 0) {
     recordingFile.flush();
+  }
+}
+
+// Autorecording configuration
+void DataLogger::setAutoRecordingTime(int time) {
+  autoRecordingTime = max(AUTO_RECORDING_MIN, min(AUTO_RECORDING_MAX, time));
+}
+
+int DataLogger::getAutoRecordingTime() const {
+  return autoRecordingTime;
+}
+
+unsigned long DataLogger::getRecordingStartTime() const {
+  return recordingStartTime;
+}
+
+void DataLogger::checkAutoStop() {
+  if (isRecording() && getAutoRecordingTime() > 0) {
+    unsigned long elapsed = millis() - recordingStartTime;
+    if (elapsed >= (unsigned long)getAutoRecordingTime() * 1000) {
+      stopRecording();
+    }
   }
 }
 

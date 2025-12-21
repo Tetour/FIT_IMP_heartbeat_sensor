@@ -2,9 +2,11 @@
 #include "display.hpp"
 #include "joystick.hpp"
 #include "sensor.hpp"
+#include "data_logger.hpp"
 
-Sensor sensor;
-Display display(sensor);
+DataLogger dataLogger;
+Sensor sensor(dataLogger);
+Display display(sensor, dataLogger);
 Joystick joystick;
 
 bool showMenu = false;
@@ -14,6 +16,7 @@ void setup() {
   
   display.init();
   joystick.init();
+  dataLogger.init();
   sensor.init();
 }
 
@@ -43,10 +46,10 @@ void loop() {
   } else {
     // Direct recording toggle when in BPM display mode
     if (joystick.wasLeftPressed() || joystick.wasRightPressed()) {
-      if (sensor.isRecording()) {
-        sensor.stopRecording();
+      if (dataLogger.isRecording()) {
+        dataLogger.stopRecording();
       } else {
-        sensor.startRecording();
+        dataLogger.startRecording("/sensor_data.csv");
       }
     }
   }
