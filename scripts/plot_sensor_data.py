@@ -37,36 +37,27 @@ def plot_sensor_data(data_dir="data"):
         for i, csv_file in enumerate(csv_files):
             plot_single_file(csv_file, i)
     else:
-        # Create subplots for multiple files (original behavior)
-        fig, axes = plt.subplots(len(csv_files), 1, figsize=(12, 6 * len(csv_files)))
-        if len(csv_files) == 1:
-            axes = [axes]  # Make it iterable for single plot
-
+        # Create separate figures for examples as well
         for i, csv_file in enumerate(csv_files):
-            plot_file_on_axis(csv_file, axes[i])
-
-        plt.tight_layout()
-
-        # Save the combined figure
-        data_path = Path(data_dir)
-        if len(csv_files) == 1:
-            # Single file - save with same name as CSV
-            csv_path = Path(csv_files[0])
-            output_path = csv_path.with_suffix('.png')
-        else:
-            # Multiple files - save as combined plot in data directory
-            output_path = data_path / "combined_plots.png"
-
-        fig.savefig(output_path, dpi=300, bbox_inches='tight')
-        print(f"Saved combined figure to: {output_path}")
-
-        plt.close(fig)  # Close the figure to free memory
+            plot_single_file(csv_file, i)
 
 
 def plot_single_file(csv_file, index):
-    """Plot a single CSV file in its own figure"""
-    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    plot_file_on_axis(csv_file, ax)
+    """Plot a single CSV file with signal and BPM data in separate subplots"""
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
+    
+    # Plot signal data on top subplot
+    plot_signal_on_axis(csv_file, ax1)
+    
+    # Plot BPM data on bottom subplot
+    plot_bpm_on_axis(csv_file, ax2)
+    
+    # Set overall title
+    fig.suptitle(f'Heartbeat Sensor Data - {os.path.basename(csv_file)}', fontsize=14)
+    
+    # Adjust layout
+    plt.tight_layout()
+    fig.subplots_adjust(top=0.92)
 
     # Save the figure next to the data file
     csv_path = Path(csv_file)
@@ -77,7 +68,8 @@ def plot_single_file(csv_file, index):
     plt.close(fig)  # Close the figure to free memory
 
 
-def plot_file_on_axis(csv_file, ax):
+def plot_signal_on_axis(csv_file, ax):
+    """Plot signal data on the given axis"""
     try:
         # Read first few lines to check if file has headers
         with open(csv_file, 'r') as f:
@@ -105,10 +97,9 @@ def plot_file_on_axis(csv_file, ax):
 
         # Plot the data
         time_offset = df[timestamp_col].min()
-        ax.plot(df[timestamp_col] - time_offset, df[signal_col], 'b-', linewidth=1, alpha=0.8)
-        ax.set_xlabel('Time (ms from start)')
+        ax.plot(df[timestamp_col] - time_offset, df[signal_col], 'b-', linewidth=1, alpha=0.8, label='Signal')
         ax.set_ylabel('Signal Value')
-        ax.set_title(f'Heartbeat Sensor Signal - {os.path.basename(csv_file)}')
+        ax.set_title('Signal Data')
         ax.grid(True, alpha=0.3)
 
         # Plot threshold if available
@@ -133,9 +124,54 @@ def plot_file_on_axis(csv_file, ax):
 
         ax.legend()
 
-        print(f"Plotted {len(df)} data points from {os.path.basename(csv_file)}")
     except Exception as e:
-        print(f"Error processing {csv_file}: {e}")
+        print(f"Error processing signal data from {csv_file}: {e}")
+
+
+def plot_bpm_on_axis(csv_file, ax):
+    """Plot BPM data on the given axis"""
+    try:
+        # Read first few lines to check if file has headers
+        with open(csv_file, 'r') as f:
+            first_line = f.readline().strip()
+            # Check if first line contains numeric values (likely data) or text (likely headers)
+            try:
+                # If first value is numeric, assume no headers
+                float(first_line.split(',')[0])
+                has_headers = False
+            except ValueError:
+                # If first value is not numeric, assume headers
+                has_headers = True
+
+        if has_headers:
+            df = pd.read_csv(csv_file)
+            timestamp_col = 'timestamp'
+            bpm_col = 'bpm'
+        else:
+            df = pd.read_csv(csv_file, header=None,
+                           names=['timestamp', 'signal', 'peak', 'trough', 'threshold', 'beat_detected', 'bpm'])
+            timestamp_col = 'timestamp'
+            bpm_col = 'bpm'
+
+        # Plot BPM data
+        time_offset = df[timestamp_col].min()
+        ax.plot(df[timestamp_col] - time_offset, df[bpm_col], 'r-', linewidth=2, alpha=0.8, label='BPM')
+        ax.set_xlabel('Time (ms from start)')
+        ax.set_ylabel('BPM')
+        ax.set_title('Heart Rate (BPM)')
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+
+        # Set Y limits for BPM starting from zero
+        valid_bpm = df[df[bpm_col] > 0][bpm_col]
+        if not valid_bpm.empty:
+            bpm_max = min(200, valid_bpm.max() + 10)
+            ax.set_ylim(bottom=0, top=bpm_max)
+        else:
+            ax.set_ylim(bottom=0, top=200)
+
+    except Exception as e:
+        print(f"Error processing BPM data from {csv_file}: {e}")
 
 def main():
     # Allow custom data directory as command line argument

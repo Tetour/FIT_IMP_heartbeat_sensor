@@ -24,12 +24,12 @@ void loop() {
   joystick.update();
   sensor.update();
 
-  // Toggle menu on middle button press (edge detection)
+  // Toggle settings on middle button press
   if (joystick.wasMidPressed()) {
     showMenu = !showMenu;
   }
 
-  // Menu navigation when menu is shown
+  // Settings navigation
   if (showMenu) {
     if (joystick.wasUpPressed()) {
       display.handleUpMovement();
@@ -66,5 +66,5 @@ void loop() {
     lastDisplayUpdate = millis();
   }
 
-  delay(50);
+  delay(20);
 }
