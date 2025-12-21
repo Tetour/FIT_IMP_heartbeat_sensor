@@ -2,6 +2,9 @@
 """
 Heartbeat Sensor Data Plotter
 Plots timestamp vs signal data from CSV files in the data directory and saves figures
+
+Usage: python plot_sensor_data.py [data_directory] [--beat-bpm]
+  --beat-bpm: Enable beat-based BPM calculation display (default: off)
 """
 
 import os
@@ -10,14 +13,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
+import argparse
 from pathlib import Path
 
-def plot_sensor_data(data_dir="data"):
+def plot_sensor_data(data_dir="data", show_beat_bpm=True):
     """
     Plot timestamp vs signal data from CSV files in the data directory and save figures
 
     Args:
         data_dir (str): Directory containing CSV files (default: "data")
+        show_beat_bpm (bool): Whether to show beat-based BPM calculation (default: True)
     """
     # Get all CSV files in the data directory
     csv_files = glob.glob(os.path.join(data_dir, "*.csv"))
@@ -36,14 +41,14 @@ def plot_sensor_data(data_dir="data"):
     if is_measurements:
         # Create separate figures for each measurement
         for i, csv_file in enumerate(csv_files):
-            plot_single_file(csv_file, i)
+            plot_single_file(csv_file, i, show_beat_bpm)
     else:
         # Create separate figures for examples as well
         for i, csv_file in enumerate(csv_files):
-            plot_single_file(csv_file, i)
+            plot_single_file(csv_file, i, show_beat_bpm)
 
 
-def plot_single_file(csv_file, index):
+def plot_single_file(csv_file, index, show_beat_bpm=True):
     """Plot a single CSV file with signal and BPM data in separate subplots"""
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
     
@@ -51,7 +56,7 @@ def plot_single_file(csv_file, index):
     plot_signal_on_axis(csv_file, ax1)
     
     # Plot BPM data on bottom subplot
-    plot_bpm_on_axis(csv_file, ax2)
+    plot_bpm_on_axis(csv_file, ax2, show_beat_bpm)
     
     # Set overall title
     fig.suptitle(f'Heartbeat Sensor Data - {os.path.basename(csv_file)}', fontsize=14)
@@ -129,7 +134,7 @@ def plot_signal_on_axis(csv_file, ax):
         print(f"Error processing signal data from {csv_file}: {e}")
 
 
-def plot_bpm_on_axis(csv_file, ax):
+def plot_bpm_on_axis(csv_file, ax, show_beat_bpm=True):
     """Plot BPM data on the given axis"""
     try:
         # Read first few lines to check if file has headers
@@ -170,11 +175,11 @@ def plot_bpm_on_axis(csv_file, ax):
         beat_timestamps = df[df[beat_detected_col] == 1][timestamp_col].values
         beat_based_bpms = []
         
-        if len(beat_timestamps) > 1:
+        if len(beat_timestamps) > 1 and show_beat_bpm:
             # Calculate BPM between consecutive beats
             intervals_ms = np.diff(beat_timestamps)  # Time differences in milliseconds
             intervals_sec = intervals_ms / 1000.0    # Convert to seconds
-            bpm_values = 60.0 / intervals_sec         # BPM = 60 / interval in seconds
+            bpm_values = 60.0 / intervals_sec        # BPM = 60 / interval in seconds
             
             # Apply sliding average of up to 10 BPM values (never more)
             for i in range(len(bpm_values)):
@@ -201,7 +206,7 @@ def plot_bpm_on_axis(csv_file, ax):
         
         # Update title with beat count and average BPM values
         title = f'Heart Rate (BPM)\nBeats: {int(total_beats)}, Sensor Avg: {sensor_avg_bpm:.1f}'
-        if len(beat_based_bpms) > 0:
+        if len(beat_based_bpms) > 0 and show_beat_bpm:
             # Calculate average of the last 10 beat-based BPM values
             last_beat_bpms = beat_based_bpms[-min(10, len(beat_based_bpms)):]
             beat_avg_bpm = np.mean(last_beat_bpms)
@@ -223,16 +228,21 @@ def plot_bpm_on_axis(csv_file, ax):
         print(f"Error processing BPM data from {csv_file}: {e}")
 
 def main():
-    # Allow custom data directory as command line argument
-    data_dir = sys.argv[1] if len(sys.argv) > 1 else "data"
-
+    parser = argparse.ArgumentParser(description='Plot heartbeat sensor data from CSV files')
+    parser.add_argument('data_dir', nargs='?', default='data', 
+                       help='Directory containing CSV files (default: data)')
+    parser.add_argument('--beat-bpm', action='store_true', 
+                       help='Show beat-based BPM calculation (default: off)')
+    
+    args = parser.parse_args()
+    
     # Check if data directory exists
-    if not os.path.exists(data_dir):
-        print(f"Error: Data directory '{data_dir}' not found!")
-        print("Usage: python plot_sensor_data.py [data_directory]")
+    if not os.path.exists(args.data_dir):
+        print(f"Error: Data directory '{args.data_dir}' not found!")
+        print("Usage: python plot_sensor_data.py [data_directory] [--beat-bpm]")
         sys.exit(1)
 
-    plot_sensor_data(data_dir)
+    plot_sensor_data(args.data_dir, args.beat_bpm)
 
 if __name__ == "__main__":
     main()
